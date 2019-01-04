@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
 import { DataService } from '../data.service';
 import { Customer } from '../interfaces/customer.interface';
 

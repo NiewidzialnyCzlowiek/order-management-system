@@ -7,12 +7,14 @@ import { AppComponent } from './app.component';
 import { CustomerListComponent } from './customer-list/customer-list.component';
 import { DataService } from './data.service';
 import { HttpClientModule } from '@angular/common/http';
+import { CustomerCardComponent } from './customer-card/customer-card.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    CustomerListComponent
+    CustomerListComponent,
+    CustomerCardComponent
   ],
   imports: [
     BrowserModule,
