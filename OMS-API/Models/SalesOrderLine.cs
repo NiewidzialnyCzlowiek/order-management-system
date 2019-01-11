@@ -4,11 +4,12 @@ namespace OMSAPI.Models
 {
     public class SalesOrderLine
     {
-        [ForeignKey("SalesOrderHeader")]
-        public int OrderHeaderNo { get; set; }
-        public int LineNo { get; set; }
-        public virtual Item Item { get; set; }
+        public int Id { get; set; }
         public decimal Quantity { get; set; }
-        public virtual SalesOrderHeader OrderHeader { get; set; }
+        public decimal Amount { get; set; }
+        public int ItemId { get; set; }
+        public Item Item { get; set; }
+        public int SalesOrderHeaderId { get; set; }
+        public SalesOrderHeader SalesOrderHeader { get; set; }
     }
 }

@@ -8,16 +8,14 @@ namespace OMSAPI.Models
     public class SalesOrderHeader
     {
         [Key]
-        public int No { get; set; }
+        public int Id { get; set; }
         public DateTime OrderDate { get; set; }
-        public DateTime? ShipmentDate { get; set; }
-        [ForeignKey("Customer")]
-        public int SellToCustomerNo { get; set; }
-        [ForeignKey("Address")]
-        public int ShipToAddressNo { get; set; }
+        public DateTime ShipmentDate { get; set; }
+        public int CustomerId { get; set; }
 
-        public virtual Customer SellToCustomer { get; set; }
-        public virtual Address ShipToAddress { get; set; }
+        public Customer Customer { get; set; }
+        public int AddressId { get; set; }
+        public Address Address { get; set; }
         public virtual ICollection<SalesOrderLine> Lines { get; set; }
     }
 }

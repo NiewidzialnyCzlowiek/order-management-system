@@ -5,20 +5,19 @@ namespace OMSAPI.Models
 {
     public class Address
     {
-        [ForeignKey("Customer")]
-        public string CustomerNo { get; set; }
-        public int AddressNo { get; set; }
-        [MaxLength(50)]
+        public int Id { get; set; }
+        [Required]
         public string Country { get; set; }
-        [MaxLength(10)]
+        [Required]
         public string PostCode { get; set; }
-        [MaxLength(50)]
         public string City { get; set; }
-        [MaxLength(50)]
+        [Required]
         public string Street { get; set; }
-        public int BuildingNo { get; set; }
-        public int? AppartmentNo { get; set; }
+        [Required]
+        public string BuildingNo { get; set; }
+        public string AppartmentNo { get; set; }
 
-        public virtual Customer Customer { get; set; }
+        public int CustomerId { get; set; }
+        public Customer Customer { get; set; }
     }
 }

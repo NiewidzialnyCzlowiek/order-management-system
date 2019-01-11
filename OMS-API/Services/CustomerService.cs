@@ -20,21 +20,20 @@ namespace OMSAPI.Services
             _context.SaveChanges();
         }
 
-        public void Delete(string customerNo)
+        public void Delete(int customerId)
         {
-            var customerToDelete = _context.Customers.FirstOrDefault(cust => cust.No == customerNo);
+            var customerToDelete = _context.Customers.FirstOrDefault(cust => cust.Id == customerId);
             // TODO check if any sales orders exist for the customer
             if (customerToDelete != null)
             {
                 _context.Customers.Remove(customerToDelete);
                 _context.SaveChanges();
             }
-
         }
 
-        public Customer Get(string no)
+        public Customer Get(int id)
         {
-            return _context.Customers.Find(no);
+            return _context.Customers.Find(id);
         }
 
         public IEnumerable<Customer> GetAll()
@@ -45,7 +44,7 @@ namespace OMSAPI.Services
         public void Modify(Customer customer)
         {
             _context.Entry(customer).State = EntityState.Modified;
-            _context.SaveChanges();
+            _context.SaveChangesAsync();
         }
     }
 }

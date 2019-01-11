@@ -12,13 +12,5 @@ namespace OMSAPI.DataContext
         public DbSet<Address> Addresses { get; set; }
         public DbSet<UnitOfMeasure> UnitsOfMeasure { get; set; }
         public OMSDbContext(DbContextOptions contextOptions) : base(contextOptions) {}
-        protected override void OnModelCreating(ModelBuilder modelBuilder) {
-            base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<Address>()
-                .HasKey(address => new { address.CustomerNo, address.AddressNo});
-
-            modelBuilder.Entity<SalesOrderLine>()
-                .HasKey(salesOrderLine => new { salesOrderLine.OrderHeaderNo, salesOrderLine.LineNo});
-        }
     }
 }

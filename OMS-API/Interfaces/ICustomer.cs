@@ -6,9 +6,9 @@ namespace OMSAPI.Interfaces
     public interface ICustomer
     {
         void Insert(Customer customer);
-        Customer Get(string customerNo);
+        Customer Get(int customerId);
         IEnumerable<Customer> GetAll();
         void Modify(Customer customer);
-        void Delete(string customerNo);
+        void Delete(int customerId);
     }
 }

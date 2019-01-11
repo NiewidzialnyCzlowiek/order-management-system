@@ -17,10 +17,10 @@ namespace OMSAPI.Controllers
             _customerService = customerService;
         }
 
-        [HttpGet("{customerNo}")]
-        public ActionResult<Customer> Get(string customerNo) 
+        [HttpGet("{customerId}")]
+        public ActionResult<Customer> Get(int customerId) 
         {
-            return _customerService.Get(customerNo);
+            return _customerService.Get(customerId);
         }
 
         [HttpGet]
