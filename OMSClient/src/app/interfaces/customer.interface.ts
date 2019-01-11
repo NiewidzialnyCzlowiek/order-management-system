@@ -1,5 +1,7 @@
+import { Address } from './address.interface';
+
 export interface Customer {
-    no: string;
+    id: number;
     name: string;
-    addresses: Object;
+    addresses: Address[];
 }

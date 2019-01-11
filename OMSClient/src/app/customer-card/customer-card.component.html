@@ -1,3 +1,8 @@
-<p>
-  customer-card works!
-</p>
+<mat-card>
+  <mat-card-title> {{ customer.id }} -  {{ customer.name }}</mat-card-title>
+  <mat-card-content>
+    <mat-form-field>
+      <input matInput [(ngModel)]="customer.name" placeholder="Name">
+    </mat-form-field>
+  </mat-card-content>
+</mat-card>

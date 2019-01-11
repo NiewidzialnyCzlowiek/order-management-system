@@ -1,1 +1,29 @@
-/* You can add global styles to this file, and also import other style files */
+@import "~@angular/material/prebuilt-themes/deeppurple-amber.css";
+
+$theme-color: #673ab7;
+$theme-color-darkened: #6136ac;
+$accent-color: #ffd740;
+
+body {
+    margin: 0;
+}
+
+.rounded-corners {
+    border-radius: 4px;
+}
+
+.main-button:hover {
+    background-color: #6136ac;
+}
+
+.half-width {
+    width: 50%;
+}
+
+.full-width {
+    width: 100%;
+}
+
+mat-card {
+    margin-top: 16px;
+}

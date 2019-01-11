@@ -1,0 +1,27 @@
+<mat-form-field class="half-width">
+  <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search">
+</mat-form-field>
+<table mat-table [dataSource]="addressData" matSort class="mat-elevation-z1 full-width">
+  <ng-container matColumnDef="id">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>Id.</mat-header-cell>
+    <mat-cell *matCellDef="let address"> {{ address.id }} </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="country">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>Country</mat-header-cell>
+    <mat-cell *matCellDef="let address"> {{ address.country }} </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="city">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>City</mat-header-cell>
+    <mat-cell *matCellDef="let address"> {{ address.city }} </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="street">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>Street</mat-header-cell>
+    <mat-cell *matCellDef="let address"> {{ address.street }} </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="buildingNo">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>Building No.</mat-header-cell>
+    <mat-cell *matCellDef="let address"> {{ address.buildingNo }} </mat-cell>
+  </ng-container>
+  <mat-header-row *matHeaderRowDef="tableColumns; sticky: true"></mat-header-row>
+  <mat-row matRipple *matRowDef="let row; columns: tableColumns" (click)="goToAddress(row)"></mat-row>
+</table>

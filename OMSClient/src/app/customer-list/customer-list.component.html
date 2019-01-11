@@ -1,7 +1,16 @@
-<ul>
-    <li *ngFor="let customer of customers">
-      <p>{{ customer.no }}</p>
-      <p>{{ customer.name }}</p>
-    </li>
-  </ul>
+<mat-form-field class="half-width">
+  <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search">
+</mat-form-field>
+<table mat-table [dataSource]="customerData" matSort class="mat-elevation-z1 full-width">
+  <ng-container matColumnDef="id">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>Id.</mat-header-cell>
+    <mat-cell *matCellDef="let customer"> {{ customer.id }} </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="name">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>Name</mat-header-cell>
+    <mat-cell *matCellDef="let customer"> {{ customer.name }} </mat-cell>
+  </ng-container>
+  <mat-header-row *matHeaderRowDef="tableColumns; sticky: true"></mat-header-row>
+  <mat-row matRipple *matRowDef="let row; columns: tableColumns" (click)="goToCustomer(row)"></mat-row>
+</table>
   

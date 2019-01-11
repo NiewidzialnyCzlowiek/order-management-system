@@ -1,1 +1,11 @@
-<router-outlet></router-outlet>
+<div class="app-wrapper">
+    <div class="navbar">
+        <mat-toolbar color="primary">
+            <a matRipple routerLink="/Customers" routerLinkActive="active" class="mat-button rounded-corners main-button">Customers</a>
+            <a matRipple routerLink="/Addresses" routerLinkActive="active" class="mat-button rounded-corners main-button">Addresses</a>
+        </mat-toolbar>
+    </div>
+    <div class="content-wrapper">
+        <router-outlet></router-outlet>
+    </div>
+</div>
