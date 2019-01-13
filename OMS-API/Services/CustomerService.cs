@@ -14,21 +14,31 @@ namespace OMSAPI.Services
             _context = context;
         }
 
-        public void Insert(Customer customer)
+        public DatabaseOperationStatus Insert(Customer customer)
         {
-            _context.Customers.Add(customer);
-            _context.SaveChanges();
+            var tracked = Get(customer.Id);
+            if (tracked != null) {
+                tracked.Name = customer.Name;
+                return Modify(tracked);
+            } else {
+                _context.Customers.Add(customer);
+                return SaveChanges();
+            }
         }
 
-        public void Delete(int customerId)
+        public DatabaseOperationStatus Delete(int customerId)
         {
             var customerToDelete = _context.Customers.FirstOrDefault(cust => cust.Id == customerId);
             // TODO check if any sales orders exist for the customer
             if (customerToDelete != null)
             {
                 _context.Customers.Remove(customerToDelete);
-                _context.SaveChanges();
+                return SaveChanges();
             }
+            return new DatabaseOperationStatus {
+                StatusOk = true,
+                Message = "Deletion successful"
+            };
         }
 
         public Customer Get(int id)
@@ -41,10 +51,25 @@ namespace OMSAPI.Services
             return _context.Customers;
         }
 
-        public void Modify(Customer customer)
+        public DatabaseOperationStatus Modify(Customer customer)
         {
             _context.Entry(customer).State = EntityState.Modified;
-            _context.SaveChangesAsync();
+            return SaveChanges();
+        }
+        private DatabaseOperationStatus SaveChanges() {
+            try {
+                _context.SaveChanges();
+            }
+            catch(DbUpdateException e) {
+                return new DatabaseOperationStatus {
+                    StatusOk = false,
+                    Message = e.Message
+                };
+            }
+            return new DatabaseOperationStatus {
+                StatusOk = true,
+                Message = "Operation successful"
+            };
         }
     }
 }

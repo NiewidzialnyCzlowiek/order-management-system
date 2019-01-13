@@ -5,10 +5,10 @@ namespace OMSAPI.Interfaces
 {
     public interface ISalesOrderHeader
     {
-        void Insert(SalesOrderHeader salesOrderHeader);
+        DatabaseOperationStatus Insert(SalesOrderHeader salesOrderHeader);
         SalesOrderHeader Get(int id);
         IEnumerable<SalesOrderHeader> GetAll();
-        void Modify(SalesOrderHeader salesOrderHeader);
-        void Delete(int id);
+        DatabaseOperationStatus Modify(SalesOrderHeader salesOrderHeader);
+        DatabaseOperationStatus Delete(int id);
     }
 }

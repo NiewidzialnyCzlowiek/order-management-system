@@ -11,5 +11,10 @@ namespace OMSAPI.Models
         public Item Item { get; set; }
         public int SalesOrderHeaderId { get; set; }
         public SalesOrderHeader SalesOrderHeader { get; set; }
+        public void TransferFields(SalesOrderLine fromSalesLine) {
+            Quantity = fromSalesLine.Quantity;
+            Amount = fromSalesLine.Amount;
+            ItemId = fromSalesLine.ItemId;
+        }
     }
 }

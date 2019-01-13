@@ -24,16 +24,15 @@ namespace OMSAPI.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Address>> Get()
+        public ActionResult<IEnumerable<Address>> GetAll()
         {
             return _addressService.GetAll().ToArray();
         }
 
         [HttpPost]
-        public ActionResult<bool> Post(Address address)
+        public ActionResult<DatabaseOperationStatus> Post(Address address)
         {
-            _addressService.Insert(address);
-            return true;
+            return _addressService.Insert(address);
         }
         [HttpGet("forCustomer/{customerId}")]
         public ActionResult<IEnumerable<Address>> GetForCustomer(int customerId)

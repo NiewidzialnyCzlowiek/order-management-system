@@ -5,10 +5,10 @@ namespace OMSAPI.Interfaces
 {
     public interface IItem
     {
-        void Insert(Item item);
+        DatabaseOperationStatus Insert(Item item);
         Item Get(int itemId);
         IEnumerable<Item> GetAll();
-        void Modify(Item item);
-        void Delete(int itemId);
+        DatabaseOperationStatus Modify(Item item);
+        DatabaseOperationStatus Delete(int itemId);
     }
 }

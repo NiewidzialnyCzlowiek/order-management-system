@@ -7,57 +7,53 @@ using OMSAPI.Models;
 
 namespace OMSAPI.Services
 {
-    class AddressService : IAddress
+    class SalesOrderHeaderService : ISalesOrderHeader
     {
         private OMSDbContext _context;
-        public AddressService(OMSDbContext context) {
+        public SalesOrderHeaderService(OMSDbContext context) {
             _context = context;
         }
-        public DatabaseOperationStatus Delete(int addressId)
+
+        public DatabaseOperationStatus Delete(int id)
         {
-            var addressToDelete = _context.Addresses.FirstOrDefault(addr => addr.Id == addressId);
-            if (addressToDelete != null)
-            {
-                _context.Addresses.Remove(addressToDelete);
+            var salesOrderHeader = _context.SalesOrderHeaders.FirstOrDefault( orderHeader => orderHeader.Id == id);
+            if(salesOrderHeader != null) {
+                _context.SalesOrderHeaders.Remove(salesOrderHeader);
                 return SaveChanges();
             }
             return new DatabaseOperationStatus {
                 StatusOk = true,
-                Message = $"There is no address with id: { addressId }"
+                Message = $"There is no salesOrderHeader with id: { id }"
             };
         }
 
-        public Address Get(int addressId)
+        public SalesOrderHeader Get(int id)
         {
-            return _context.Addresses.Find(addressId);
+            return _context.SalesOrderHeaders.Find(id);
         }
 
-        public IEnumerable<Address> GetAll()
+        public IEnumerable<SalesOrderHeader> GetAll()
         {
-            return _context.Addresses;
+            return _context.SalesOrderHeaders;
         }
 
-        public IEnumerable<Address> GetAllForCustomer(int customerId)
+        public DatabaseOperationStatus Insert(SalesOrderHeader salesOrderHeader)
         {
-            return _context.Addresses.Where(addr => addr.CustomerId == customerId);
-        }
-
-        public DatabaseOperationStatus Insert(Address address)
-        {
-            var tracked = Get(address.Id);
+            var tracked = _context.SalesOrderHeaders.Find(salesOrderHeader.Id);
             if(tracked != null) {
-                tracked.TransferFields(address);
+                tracked.TransferFields(salesOrderHeader);
                 return Modify(tracked);
             }
-            _context.Addresses.Add(address);
+            _context.SalesOrderHeaders.Add(salesOrderHeader);
             return SaveChanges();
         }
 
-        public DatabaseOperationStatus Modify(Address address)
+        public DatabaseOperationStatus Modify(SalesOrderHeader salesOrderHeader)
         {
-            _context.Entry(address).State = EntityState.Modified;
+            _context.Entry(salesOrderHeader).State = EntityState.Modified;
             return SaveChanges();
         }
+
         private DatabaseOperationStatus SaveChanges() {
             try {
                 _context.SaveChanges();

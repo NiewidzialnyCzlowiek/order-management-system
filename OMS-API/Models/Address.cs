@@ -19,5 +19,14 @@ namespace OMSAPI.Models
 
         public int CustomerId { get; set; }
         public Customer Customer { get; set; }
+        public void TransferFields(Address fromAddress) {
+            Country = fromAddress.Country;
+            PostCode = fromAddress.PostCode;
+            City = fromAddress.City;
+            Street = fromAddress.Street;
+            BuildingNo = fromAddress.BuildingNo;
+            AppartmentNo = fromAddress.AppartmentNo;
+            CustomerId = fromAddress.CustomerId;
+        }
     }
 }

@@ -3,12 +3,12 @@ using OMSAPI.Models;
 
 namespace OMSAPI.Interfaces
 {
-    public interface IUnitOfMEasure
+    public interface IUnitOfMeasure
     {
-        void Insert(UnitOfMeasure address);
+        DatabaseOperationStatus Insert(UnitOfMeasure unitOfMeasure);
         UnitOfMeasure Get(string code);
         IEnumerable<UnitOfMeasure> GetAll();
-        void Modify(UnitOfMeasure unitOfMeasure);
-        void Delete(string code);
+        DatabaseOperationStatus Modify(UnitOfMeasure unitOfMeasure);
+        DatabaseOperationStatus Delete(string code);
     }
 }

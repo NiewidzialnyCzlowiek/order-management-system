@@ -17,5 +17,11 @@ namespace OMSAPI.Models
         public int AddressId { get; set; }
         public Address Address { get; set; }
         public virtual ICollection<SalesOrderLine> Lines { get; set; }
+        public void TransferFields(SalesOrderHeader fromSalesHeader) {
+            OrderDate = fromSalesHeader.OrderDate;
+            ShipmentDate = fromSalesHeader.ShipmentDate;
+            CustomerId = fromSalesHeader.CustomerId;
+            AddressId = fromSalesHeader.AddressId;
+        }
     }
 }

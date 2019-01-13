@@ -7,55 +7,50 @@ using OMSAPI.Models;
 
 namespace OMSAPI.Services
 {
-    class AddressService : IAddress
+    class ItemService : IItem
     {
         private OMSDbContext _context;
-        public AddressService(OMSDbContext context) {
+        public ItemService(OMSDbContext context) {
             _context = context;
         }
-        public DatabaseOperationStatus Delete(int addressId)
+
+        public DatabaseOperationStatus Delete(int itemId)
         {
-            var addressToDelete = _context.Addresses.FirstOrDefault(addr => addr.Id == addressId);
-            if (addressToDelete != null)
-            {
-                _context.Addresses.Remove(addressToDelete);
+            var item = _context.Items.FirstOrDefault( it => it.Id == itemId );
+            if(item != null) {
+                _context.Items.Remove(item);
                 return SaveChanges();
             }
             return new DatabaseOperationStatus {
                 StatusOk = true,
-                Message = $"There is no address with id: { addressId }"
+                Message = $"There is no item with id { itemId }"
             };
         }
 
-        public Address Get(int addressId)
+        public Item Get(int itemId)
         {
-            return _context.Addresses.Find(addressId);
+            return _context.Items.Find(itemId);
         }
 
-        public IEnumerable<Address> GetAll()
+        public IEnumerable<Item> GetAll()
         {
-            return _context.Addresses;
+            return _context.Items;
         }
 
-        public IEnumerable<Address> GetAllForCustomer(int customerId)
+        public DatabaseOperationStatus Insert(Item item)
         {
-            return _context.Addresses.Where(addr => addr.CustomerId == customerId);
-        }
-
-        public DatabaseOperationStatus Insert(Address address)
-        {
-            var tracked = Get(address.Id);
+            var tracked = Get(item.Id);
             if(tracked != null) {
-                tracked.TransferFields(address);
+                tracked.TransferFields(item);
                 return Modify(tracked);
             }
-            _context.Addresses.Add(address);
+            _context.Items.Add(item);
             return SaveChanges();
         }
 
-        public DatabaseOperationStatus Modify(Address address)
+        public DatabaseOperationStatus Modify(Item item)
         {
-            _context.Entry(address).State = EntityState.Modified;
+            _context.Entry(item).State = EntityState.Modified;
             return SaveChanges();
         }
         private DatabaseOperationStatus SaveChanges() {

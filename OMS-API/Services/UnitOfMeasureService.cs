@@ -7,57 +7,54 @@ using OMSAPI.Models;
 
 namespace OMSAPI.Services
 {
-    class AddressService : IAddress
+    class UnitOfMeasureService : IUnitOfMeasure
     {
         private OMSDbContext _context;
-        public AddressService(OMSDbContext context) {
+        public UnitOfMeasureService(OMSDbContext context) {
             _context = context;
         }
-        public DatabaseOperationStatus Delete(int addressId)
+
+        public DatabaseOperationStatus Delete(string code)
         {
-            var addressToDelete = _context.Addresses.FirstOrDefault(addr => addr.Id == addressId);
-            if (addressToDelete != null)
-            {
-                _context.Addresses.Remove(addressToDelete);
+            var unitOfMeasure = _context.UnitsOfMeasure.FirstOrDefault( uom => uom.Code == code);
+            if(unitOfMeasure != null) {
+                _context.UnitsOfMeasure.Remove(unitOfMeasure);
                 return SaveChanges();
             }
             return new DatabaseOperationStatus {
                 StatusOk = true,
-                Message = $"There is no address with id: { addressId }"
+                Message = $"There is no unitOfMeasure with code: { code }"
             };
         }
 
-        public Address Get(int addressId)
+        public UnitOfMeasure Get(string code)
         {
-            return _context.Addresses.Find(addressId);
+            return _context.UnitsOfMeasure.Find(code);
         }
 
-        public IEnumerable<Address> GetAll()
+        public IEnumerable<UnitOfMeasure> GetAll()
         {
-            return _context.Addresses;
+            return _context.UnitsOfMeasure;
         }
 
-        public IEnumerable<Address> GetAllForCustomer(int customerId)
+        public DatabaseOperationStatus Insert(UnitOfMeasure unitOfMeasure)
         {
-            return _context.Addresses.Where(addr => addr.CustomerId == customerId);
-        }
-
-        public DatabaseOperationStatus Insert(Address address)
-        {
-            var tracked = Get(address.Id);
+            var tracked = Get(unitOfMeasure.Code);
             if(tracked != null) {
-                tracked.TransferFields(address);
+                tracked.Code = unitOfMeasure.Code;
+                tracked.Name = unitOfMeasure.Name;
                 return Modify(tracked);
             }
-            _context.Addresses.Add(address);
+            _context.UnitsOfMeasure.Add(unitOfMeasure);
             return SaveChanges();
         }
 
-        public DatabaseOperationStatus Modify(Address address)
+        public DatabaseOperationStatus Modify(UnitOfMeasure unitOfMeasure)
         {
-            _context.Entry(address).State = EntityState.Modified;
+            _context.Entry(unitOfMeasure).State = EntityState.Modified;
             return SaveChanges();
         }
+
         private DatabaseOperationStatus SaveChanges() {
             try {
                 _context.SaveChanges();

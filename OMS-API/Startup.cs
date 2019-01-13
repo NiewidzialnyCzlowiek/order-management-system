@@ -35,6 +35,10 @@ namespace OMSAPI
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
             services.AddScoped<ICustomer, CustomerService>();
             services.AddScoped<IAddress, AddressService>();
+            services.AddScoped<IItem, ItemService>();
+            services.AddScoped<ISalesOrderHeader, SalesOrderHeaderService>();
+            services.AddScoped<ISalesOrderLine, SalesOrderLineService>();
+            services.AddScoped<IUnitOfMeasure, UnitOfMeasureService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

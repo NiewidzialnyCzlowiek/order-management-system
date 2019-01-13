@@ -24,16 +24,15 @@ namespace OMSAPI.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Customer>> Get()
+        public ActionResult<IEnumerable<Customer>> GetAll()
         {
             return _customerService.GetAll().ToArray();
         }
 
         [HttpPost]
-        public ActionResult<bool> Post(Customer customer)
+        public ActionResult<DatabaseOperationStatus> Post(Customer customer)
         {
-            _customerService.Insert(customer);
-            return true;
+            return _customerService.Insert(customer);
         }
     }
 }
