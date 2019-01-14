@@ -1,8 +1,20 @@
 <mat-card>
-  <mat-card-title> {{ customer.id }} -  {{ customer.name }}</mat-card-title>
+  <mat-card-title> Customer Card </mat-card-title>
+  <mat-card-subtitle> Id: {{ customer.id }} </mat-card-subtitle>
   <mat-card-content>
-    <mat-form-field>
-      <input matInput [(ngModel)]="customer.name" placeholder="Name">
+    <mat-form-field class="half-width">
+      <input matInput [(ngModel)]="customer.name" placeholder="Name" (focusout)="onCustomerModified()">
+      <mat-error *ngIf="formSpecs[0].invalid"> {{ formSpecs[0].errorMessage }} </mat-error>
     </mat-form-field>
+    <mat-card>
+      <mat-card-title>Customer's Addresses</mat-card-title>
+      <mat-card-content>
+        <mat-list>
+          <mat-list-item *ngFor="let address of customer.addresses" (click)="goToAddress(address)" matRipple>
+            <span> {{ address.id }} <mat-divider vertical="true"></mat-divider> {{ address.country }} {{ address.city }} {{ address.postCode }}</span>
+          </mat-list-item>
+        </mat-list>
+      </mat-card-content>
+    </mat-card>
   </mat-card-content>
 </mat-card>

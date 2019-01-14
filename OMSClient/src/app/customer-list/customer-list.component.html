@@ -1,6 +1,11 @@
-<mat-form-field class="half-width">
-  <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search">
-</mat-form-field>
+<mat-card>
+  <mat-card-title>Customer List</mat-card-title>
+  <mat-card-content>
+    <mat-form-field class="half-width">
+      <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search">
+    </mat-form-field>
+  </mat-card-content>
+</mat-card>
 <table mat-table [dataSource]="customerData" matSort class="mat-elevation-z1 full-width">
   <ng-container matColumnDef="id">
     <mat-header-cell *matHeaderCellDef mat-sort-header>Id.</mat-header-cell>

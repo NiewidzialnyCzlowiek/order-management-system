@@ -1,0 +1,25 @@
+<mat-card>
+  <mat-card-title>Item List</mat-card-title>
+  <mat-card-content>
+    <mat-form-field class="half-width">
+      <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search">
+    </mat-form-field>
+  </mat-card-content>
+</mat-card>
+<table mat-table [dataSource]="itemData" matSort class="mat-elevation-z1 full-width">
+  <ng-container matColumnDef="id">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>Id.</mat-header-cell>
+    <mat-cell *matCellDef="let item"> {{ item.id }} </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="name">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>Name</mat-header-cell>
+    <mat-cell *matCellDef="let item"> {{ item.name }} </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="unitOfMeasure">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>Unit of Measure</mat-header-cell>
+    <mat-cell *matCellDef="let item"> {{ item.unitOfMeasureCode }} </mat-cell>
+  </ng-container>
+  <mat-header-row *matHeaderRowDef="tableColumns; sticky: true"></mat-header-row>
+  <mat-row matRipple *matRowDef="let row; columns: tableColumns" (click)="goToItem(row)"></mat-row>
+</table>
+  

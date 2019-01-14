@@ -12,6 +12,10 @@ import { MaterialConstrolsModule } from './material-controls.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AddressListComponent } from './address-list/address-list.component';
 import { AddressCardComponent } from './address-card/address-card.component';
+import { ItemListComponent } from './item-list/item-list.component';
+import { ItemCardComponent } from './item-card/item-card.component';
+import { UnitOfMeasureListComponent } from './unit-of-measure-list/unit-of-measure-list.component';
+import { UnitOfMeasureCardComponent } from './unit-of-measure-card/unit-of-measure-card.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +23,11 @@ import { AddressCardComponent } from './address-card/address-card.component';
     CustomerListComponent,
     CustomerCardComponent,
     AddressListComponent,
-    AddressCardComponent
+    AddressCardComponent,
+    ItemListComponent,
+    ItemCardComponent,
+    UnitOfMeasureListComponent,
+    UnitOfMeasureCardComponent
   ],
   imports: [
     BrowserModule,

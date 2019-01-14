@@ -1,0 +1,25 @@
+<mat-card>
+  <mat-card-title>Item Card</mat-card-title>
+  <mat-card-subtitle>Item Id: {{ item.id }} </mat-card-subtitle>
+  <mat-card-content>
+    <mat-form-field tabindex="2">
+      <input matInput [(ngModel)]="item.name" placeholder="Name">
+    </mat-form-field>
+    <mat-form-field tabindex="3">
+      <textarea matInput [(ngModel)]="item.description" placeholder="Description"></textarea>
+    </mat-form-field>
+    <mat-form-field tabindex="4">
+      <input matInput [(ngModel)]="item.unitPrice" placeholder="Unit Price">
+    </mat-form-field>
+    <mat-form-field tabindex="5">
+      <input matInput [(ngModel)]="item.unitCost" placeholder="Unit Cost">
+    </mat-form-field>
+    <mat-form-field tabindex="1">
+        <mat-select placeholder="Unit Of Measure" [(ngModel)]="item.unitOfMeasureCode">
+            <mat-option *ngFor="let uom of unitsOfMeasure" [value]="uom.code">
+                {{ uom.code }} - {{ uom.name }}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+  </mat-card-content>
+</mat-card>

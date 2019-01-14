@@ -1,0 +1,31 @@
+<mat-card>
+    <mat-card-title>Address Card</mat-card-title>
+    <mat-card-subtitle>Address Id: {{ address.id }} </mat-card-subtitle>
+    <mat-card-content>
+        <mat-form-field tabindex="1">
+            <mat-select placeholder="Customer" [(ngModel)]="address.customerId">
+                <mat-option *ngFor="let cust of customers" [value]="cust.id">
+                    {{ cust.id }} - {{ cust.name }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field tabindex="2">
+            <input matInput [(ngModel)]="address.country" placeholder="Country">
+        </mat-form-field>
+        <mat-form-field tabindex="3">
+            <input matInput [(ngModel)]="address.postCode" placeholder="Post Code">
+        </mat-form-field>
+        <mat-form-field tabindex="4">
+            <input matInput [(ngModel)]="address.city" placeholder="City">
+        </mat-form-field>
+        <mat-form-field tabindex="5">
+            <input matInput [(ngModel)]="address.street" placeholder="Street">
+        </mat-form-field>
+        <mat-form-field tabindex="6">
+            <input matInput [(ngModel)]="address.buildingNo" placeholder="Building No.">
+        </mat-form-field>
+        <mat-form-field tabindex="7">
+            <input matInput [(ngModel)]="address.appartmentNo" placeholder="Appartment No.">
+        </mat-form-field>
+    </mat-card-content>
+</mat-card>
