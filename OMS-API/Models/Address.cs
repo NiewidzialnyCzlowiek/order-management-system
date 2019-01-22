@@ -18,7 +18,7 @@ namespace OMSAPI.Models
         public string AppartmentNo { get; set; }
 
         public int CustomerId { get; set; }
-        public Customer Customer { get; set; }
+        // public virtual Customer Customer { get; set; }
         public void TransferFields(Address fromAddress) {
             Country = fromAddress.Country;
             PostCode = fromAddress.PostCode;

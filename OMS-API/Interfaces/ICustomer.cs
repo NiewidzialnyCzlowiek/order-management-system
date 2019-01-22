@@ -9,6 +9,6 @@ namespace OMSAPI.Interfaces
         Customer Get(int customerId);
         IEnumerable<Customer> GetAll();
         DatabaseOperationStatus Modify(Customer customer);
-        DatabaseOperationStatus Delete(int customerId);
+        DatabaseOperationStatus Delete(int customerId, bool cascade = false);
     }
 }

@@ -33,6 +33,12 @@ namespace OMSAPI.Controllers
         public ActionResult<DatabaseOperationStatus> Post(SalesOrderHeader orderHeader)
         {
             return _salesOrderHeaderService.Insert(orderHeader);
+        }
+
+        [HttpPost("delete")]
+        public ActionResult<DatabaseOperationStatus> Delete(DeletionRequest request)
+        {
+            return _salesOrderHeaderService.Delete(request.IntPk);
         }    
     }
 }

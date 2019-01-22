@@ -39,5 +39,10 @@ namespace OMSAPI.Controllers
         {
             return _salesOrderLineService.Insert(orderLine);
         }    
+        [HttpPost("delete")]
+        public ActionResult<DatabaseOperationStatus> Delete(DeletionRequest request)
+        {
+            return _salesOrderLineService.Delete(request.IntPk);
+        }    
     }
 }

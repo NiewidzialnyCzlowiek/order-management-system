@@ -22,23 +22,43 @@ namespace OMSAPI.Services
                 return Modify(tracked);
             } else {
                 _context.Customers.Add(customer);
-                return SaveChanges();
+                var status = SaveChanges();
+                status.NewRecordId = customer.Id;
+                return status;
             }
         }
 
-        public DatabaseOperationStatus Delete(int customerId)
+        public DatabaseOperationStatus Delete(int customerId, bool cascade = false)
         {
             var customerToDelete = _context.Customers.FirstOrDefault(cust => cust.Id == customerId);
-            // TODO check if any sales orders exist for the customer
             if (customerToDelete != null)
             {
+                if (_context.SalesOrderHeaders.Where(order => order.CustomerId == customerToDelete.Id).Count() > 0) {
+                    return new DatabaseOperationStatus {
+                        StatusOk = false,
+                        Message = "Deletion unsuccesful. There are open Sales Orders for this customer."
+                    };
+                }
+                var addresses = _context.Addresses.Where(addr => addr.CustomerId == customerToDelete.Id);
+                if (addresses.Count() > 0)
+                {
+                    if (!cascade) {
+                        return new DatabaseOperationStatus {
+                            StatusOk = false,
+                            Message = "Deletion unsuccesful. There are Addresses for this customer."
+                        };                   
+                    } else {
+                        _context.Addresses.RemoveRange(addresses);
+                    }
+                }
                 _context.Customers.Remove(customerToDelete);
                 return SaveChanges();
+            } else {
+                return new DatabaseOperationStatus {
+                    StatusOk = false,
+                    Message = "Deletion unsuccessful"
+                };
             }
-            return new DatabaseOperationStatus {
-                StatusOk = true,
-                Message = "Deletion successful"
-            };
         }
 
         public Customer Get(int id)

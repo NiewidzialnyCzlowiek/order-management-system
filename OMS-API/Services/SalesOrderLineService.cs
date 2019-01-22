@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -22,14 +23,16 @@ namespace OMSAPI.Services
                 return SaveChanges();
             }
             return new DatabaseOperationStatus {
-                StatusOk = true,
+                StatusOk = false,
                 Message = $"There is no Sales Order Line with id: { id }"
             };
         }
 
         public SalesOrderLine Get(int id)
         {
-            return _context.SalesOrderLines.Find(id);
+            return _context.SalesOrderLines
+                .Include(line => line.Item)
+                .FirstOrDefault(line => line.Id == id);
         }
 
         public IEnumerable<SalesOrderLine> GetAll()
@@ -39,18 +42,26 @@ namespace OMSAPI.Services
 
         public IEnumerable<SalesOrderLine> GetAllForSalesOrder(int salesOrderId)
         {
-            return _context.SalesOrderLines.Where(line => line.SalesOrderHeaderId == salesOrderId);
+            return _context.SalesOrderLines
+                .Where(line => line.SalesOrderHeaderId == salesOrderId)
+                .Include(line => line.Item);
         }
 
         public DatabaseOperationStatus Insert(SalesOrderLine salesOrderLine)
         {
+            DatabaseOperationStatus status;
             var tracked = _context.SalesOrderLines.Find(salesOrderLine.Id);
             if(tracked != null) {
                 tracked.TransferFields(salesOrderLine);
-                return Modify(tracked);
+                status = Modify(tracked);
             }
             _context.SalesOrderLines.Add(salesOrderLine);
-            return SaveChanges();
+            status = SaveChanges();
+            status.NewRecordId = salesOrderLine.Id;
+            if (!UpdateLineAmount(salesOrderLine.Id)) {
+                status.Message += " Could not update line amount.";
+            }
+            return status;
         }
 
         public DatabaseOperationStatus Modify(SalesOrderLine salesOrderLine)
@@ -74,5 +85,17 @@ namespace OMSAPI.Services
                 Message = "Operation successful"
             };
         }
+
+        private bool UpdateLineAmount(int id) {
+            try {
+                var res = _context.Database.ExecuteSqlCommand($"CALL public.\"CalculateSalesOrderLineAmount\"({id})");
+            }
+            catch(Exception e) {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+            return true;
+        }
+
     }
 }

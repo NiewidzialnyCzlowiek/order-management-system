@@ -39,5 +39,10 @@ namespace OMSAPI.Controllers
         {
             return _addressService.GetAllForCustomer(customerId).ToArray();
         }
+
+        [HttpPost("delete")]
+        public ActionResult<DatabaseOperationStatus> Delete(DeletionRequest request) {
+            return _addressService.Delete(request.IntPk, request.Cascade);
+        }
     }
 }

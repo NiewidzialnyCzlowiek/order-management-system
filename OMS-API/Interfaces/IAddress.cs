@@ -10,6 +10,6 @@ namespace OMSAPI.Interfaces
         IEnumerable<Address> GetAll();
         IEnumerable<Address> GetAllForCustomer(int customerId);
         DatabaseOperationStatus Modify(Address address);
-        DatabaseOperationStatus Delete(int addressId);
+        DatabaseOperationStatus Delete(int addressId, bool cascade = false);
     }
 }

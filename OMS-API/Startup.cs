@@ -32,7 +32,11 @@ namespace OMSAPI
             services.AddCors();
             services.AddDbContext<OMSDbContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                .AddJsonOptions(options => { 
+                    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                });
             services.AddScoped<ICustomer, CustomerService>();
             services.AddScoped<IAddress, AddressService>();
             services.AddScoped<IItem, ItemService>();

@@ -13,16 +13,28 @@ namespace OMSAPI.Services
         public AddressService(OMSDbContext context) {
             _context = context;
         }
-        public DatabaseOperationStatus Delete(int addressId)
+        public DatabaseOperationStatus Delete(int addressId, bool cascade = false)
         {
             var addressToDelete = _context.Addresses.FirstOrDefault(addr => addr.Id == addressId);
             if (addressToDelete != null)
             {
+                var orders = _context.SalesOrderHeaders.Where( order => order.AddressId == addressToDelete.Id);
+                if (orders.Count() > 0) {
+                    if (!cascade) {
+                        return new DatabaseOperationStatus {
+                            StatusOk = false,
+                            Message = $"Could not remove the address. There are existing sales orders for the address."
+                        };
+                    }
+                    // var t = orders.ForEachAsync(order => order.AddressId = 0);
+                    // t.Start();
+                    // t.Wait();
+                }
                 _context.Addresses.Remove(addressToDelete);
                 return SaveChanges();
             }
             return new DatabaseOperationStatus {
-                StatusOk = true,
+                StatusOk = false,
                 Message = $"There is no address with id: { addressId }"
             };
         }
@@ -50,7 +62,9 @@ namespace OMSAPI.Services
                 return Modify(tracked);
             }
             _context.Addresses.Add(address);
-            return SaveChanges();
+            var status = SaveChanges();
+            status.NewRecordId = address.Id;
+            return status;
         }
 
         public DatabaseOperationStatus Modify(Address address)

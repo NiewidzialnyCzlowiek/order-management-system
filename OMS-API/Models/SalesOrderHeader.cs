@@ -11,12 +11,13 @@ namespace OMSAPI.Models
         public int Id { get; set; }
         public DateTime OrderDate { get; set; }
         public DateTime ShipmentDate { get; set; }
-        public int CustomerId { get; set; }
+        public decimal Profit { get; set; }
+        public int? CustomerId { get; set; }
 
         public Customer Customer { get; set; }
-        public int AddressId { get; set; }
+        public int? AddressId { get; set; }
         public Address Address { get; set; }
-        public virtual ICollection<SalesOrderLine> Lines { get; set; }
+        public virtual IEnumerable<SalesOrderLine> Lines { get; set; }
         public void TransferFields(SalesOrderHeader fromSalesHeader) {
             OrderDate = fromSalesHeader.OrderDate;
             ShipmentDate = fromSalesHeader.ShipmentDate;

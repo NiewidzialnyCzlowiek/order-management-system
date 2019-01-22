@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -22,30 +23,41 @@ namespace OMSAPI.Services
                 return SaveChanges();
             }
             return new DatabaseOperationStatus {
-                StatusOk = true,
+                StatusOk = false,
                 Message = $"There is no salesOrderHeader with id: { id }"
             };
         }
 
         public SalesOrderHeader Get(int id)
         {
-            return _context.SalesOrderHeaders.Find(id);
+            return _context.SalesOrderHeaders
+                .Include(h => h.Customer)
+                .Include(h => h.Address)
+                .Include(h => h.Lines)
+                .Where(h => h.Id == id)
+                .First();
         }
 
         public IEnumerable<SalesOrderHeader> GetAll()
         {
-            return _context.SalesOrderHeaders;
+            return _context.SalesOrderHeaders
+                .Include(header => header.Customer)
+                .Include(header => header.Address);
+                
         }
 
         public DatabaseOperationStatus Insert(SalesOrderHeader salesOrderHeader)
         {
+            validate(salesOrderHeader);
             var tracked = _context.SalesOrderHeaders.Find(salesOrderHeader.Id);
             if(tracked != null) {
                 tracked.TransferFields(salesOrderHeader);
                 return Modify(tracked);
             }
             _context.SalesOrderHeaders.Add(salesOrderHeader);
-            return SaveChanges();
+            var status = SaveChanges();
+            status.NewRecordId = salesOrderHeader.Id;
+            return status;
         }
 
         public DatabaseOperationStatus Modify(SalesOrderHeader salesOrderHeader)
@@ -68,6 +80,25 @@ namespace OMSAPI.Services
                 StatusOk = true,
                 Message = "Operation successful"
             };
+        }
+
+        private void validate(SalesOrderHeader header) {
+            if (_context.Addresses.Find(header.AddressId) == null) {
+                header.AddressId = null;
+            }
+            if (_context.Customers.Find(header.CustomerId) == null) {
+                header.CustomerId = null;
+            }
+            if (header.OrderDate == default(DateTime)) {
+                header.OrderDate = DateTime.Now;
+            }
+            if (header.ShipmentDate == default(DateTime)) {
+                if (header.OrderDate != default(DateTime)) {
+                    header.ShipmentDate = header.OrderDate;
+                } else {
+                    header.ShipmentDate = DateTime.Now;
+                }
+            }
         }
     }
 }

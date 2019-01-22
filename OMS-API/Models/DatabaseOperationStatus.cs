@@ -6,5 +6,6 @@ namespace OMSAPI.Models
         public string TableName { get; set; }
         public string FieldName { get; set; }
         public string Message { get; set; }
+        public int NewRecordId { get; set; }
     }
 }
