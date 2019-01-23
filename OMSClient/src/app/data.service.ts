@@ -78,6 +78,14 @@ export class DataService {
     return this.httpClient.get<UnitOfMeasure>(this.unitOfMeasureControllerLink + code);
   }
 
+  newUnitOfMeasure(uom: UnitOfMeasure) {
+    return this.httpClient.post<DatabaseOperationStatus>(this.unitOfMeasureControllerLink, uom);
+  }
+
+  deleteUnitOfMeasure(code: string) {
+    return this.httpClient.post<DatabaseOperationStatus>(this.unitOfMeasureControllerLink + 'delete', { pk: code });
+  }
+
   getSalesOrders() {
     return this.httpClient.get<SalesOrderHeader[]>(this.salesOrderHeaderControllerLink);
   }

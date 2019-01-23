@@ -1,3 +1,24 @@
-<p>
-  unit-of-measure-list works!
-</p>
+<mat-card>
+  <mat-card-title>Units Of Measure</mat-card-title>
+  <mat-card-content>
+    <mat-form-field class="half-width">
+      <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search">
+    </mat-form-field>
+  </mat-card-content>
+</mat-card>
+<table mat-table [dataSource]="uomData" matSort class="mat-elevation-z1 full-width">
+  <ng-container matColumnDef="code">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>Code</mat-header-cell>
+    <mat-cell *matCellDef="let uom"> {{ uom.code }} </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="name">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>Name</mat-header-cell>
+    <mat-cell *matCellDef="let uom"> {{ uom.name }} </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="delete">
+    <mat-header-cell *matHeaderCellDef></mat-header-cell>
+    <mat-cell *matCellDef="let uom"><button mat-button (click)="delete(uom.code)" color="warn">Remove</button></mat-cell>
+  </ng-container>
+  <mat-header-row *matHeaderRowDef="tableColumns; sticky: true"></mat-header-row>
+  <mat-row matRipple *matRowDef="let row; columns: tableColumns"></mat-row>
+</table>

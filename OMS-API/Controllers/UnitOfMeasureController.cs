@@ -33,6 +33,12 @@ namespace OMSAPI.Controllers
         public ActionResult<DatabaseOperationStatus> Post(UnitOfMeasure unitOfMeasure)
         {
             return _unitOfMeasureService.Insert(unitOfMeasure);
+        }
+
+        [HttpPost("delete")]
+        public ActionResult<DatabaseOperationStatus> Delete(DeletionRequest request)
+        {
+            return _unitOfMeasureService.Delete(request.Pk);
         }    
     }
 }

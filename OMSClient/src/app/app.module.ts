@@ -15,7 +15,6 @@ import { AddressCardComponent } from './address-card/address-card.component';
 import { ItemListComponent } from './item-list/item-list.component';
 import { ItemCardComponent } from './item-card/item-card.component';
 import { UnitOfMeasureListComponent } from './unit-of-measure-list/unit-of-measure-list.component';
-import { UnitOfMeasureCardComponent } from './unit-of-measure-card/unit-of-measure-card.component';
 import { SalesOrderListComponent } from './sales-order-list/sales-order-list.component';
 import { SalesOrderCardComponent } from './sales-order-card/sales-order-card.component';
 import { MatNativeDateModule, MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material';
@@ -32,7 +31,6 @@ import { UserConfirmComponent } from './user-confirm/user-confirm.component';
     ItemListComponent,
     ItemCardComponent,
     UnitOfMeasureListComponent,
-    UnitOfMeasureCardComponent,
     SalesOrderListComponent,
     SalesOrderCardComponent,
     NavbarComponent,
