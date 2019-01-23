@@ -1,0 +1,31 @@
+<mat-toolbar color="primary">
+    <button mat-button (click)="navigate('/SalesOrders')">
+      <!-- <mat-icon>tab</mat-icon> -->
+      Sales Orders
+    </button>
+    <button mat-button (click)="navigate('/Customers')">
+      <!-- <mat-icon>people</mat-icon> -->
+      Customers
+    </button>
+    <button mat-button (click)="navigate('/Addresses')">
+      <!-- <mat-icon>location_city</mat-icon> -->
+      Addresses
+    </button>
+    <button mat-button (click)="navigate('/Items')">
+      <!-- <mat-icon>toc</mat-icon> -->
+      Items
+    </button>
+    <button mat-button (click)="navigate('/UnitsOfMeasure')">
+      <!-- <mat-icon>input</mat-icon> -->
+      Units Of Measure
+    </button>
+    <button mat-button id="new-entity-menu-button" [matMenuTriggerFor]="newEntityMenu">
+        <mat-icon>add_circle</mat-icon>
+    </button>
+    <mat-menu #newEntityMenu="matMenu">
+        <button mat-menu-item (click)="newSalesOrder()">New Sales Order</button>
+        <button mat-menu-item (click)="newCustomer()">New Customer</button>
+        <button mat-menu-item (click)="newAddress()">New Address</button>
+        <button mat-menu-item (click)="newItem()">New Item</button>
+    </mat-menu>
+</mat-toolbar>

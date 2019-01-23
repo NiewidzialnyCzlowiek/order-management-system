@@ -1,10 +1,6 @@
 <div class="app-wrapper">
     <div class="navbar">
-        <mat-toolbar color="primary">
-            <a matRipple routerLink="/Customers" routerLinkActive="active" class="mat-button rounded-corners main-button">Customers</a>
-            <a matRipple routerLink="/Addresses" routerLinkActive="active" class="mat-button rounded-corners main-button">Addresses</a>
-            <a matRipple routerLink="/Items" routerLinkActive="active" class="mat-button rounded-corners main-button">Items</a>
-        </mat-toolbar>
+        <app-navbar></app-navbar>
     </div>
     <div class="content-wrapper">
         <router-outlet></router-outlet>

@@ -1,0 +1,37 @@
+<mat-card>
+  <mat-card-title>Sales Orders</mat-card-title>
+  <mat-card-content>
+    <mat-form-field class="half-width">
+      <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Search">
+    </mat-form-field>
+   </mat-card-content>
+</mat-card>
+<table mat-table [dataSource]="orderData" matSort class="mat-elevation-z1 full-width">
+  <ng-container matColumnDef="id">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>Id.</mat-header-cell>
+    <mat-cell *matCellDef="let order"> {{ order.id }} </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="orderDate">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>Order Date</mat-header-cell>
+    <mat-cell *matCellDef="let order"> {{ order.orderDate }} </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="customerName">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>Customer</mat-header-cell>
+    <mat-cell *matCellDef="let order"> {{ order.customer.name }} </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="addressCountry">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>Country</mat-header-cell>
+    <mat-cell *matCellDef="let order"> {{ order.address.country }} </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="addressCity">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>City</mat-header-cell>
+    <mat-cell *matCellDef="let order"> {{ order.address.city }} </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="addressPostCode">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>Address</mat-header-cell>
+    <mat-cell *matCellDef="let order"> {{ order.address.postCode }} </mat-cell>
+  </ng-container>
+  <mat-header-row *matHeaderRowDef="tableColumns; sticky: true"></mat-header-row>
+  <mat-row matRipple *matRowDef="let row; columns: tableColumns" (click)="goToOrder(row)"></mat-row>
+</table>
+

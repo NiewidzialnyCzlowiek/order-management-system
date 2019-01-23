@@ -3,4 +3,5 @@ export interface DatabaseOperationStatus {
     tableName: string;
     fieldName: string;
     message: string;
+    newRecordId: number;
 }

@@ -1,0 +1,21 @@
+mat-card {
+    margin-bottom: 10px;
+    mat-card-content {
+        display: grid;
+        grid-template-rows: 65px 55px 55px;
+        grid-template-columns: 1fr 1fr;
+        mat-form-field {
+            width: 75%;
+        }
+    }
+}
+
+table {
+    margin-top: 10px;
+}
+
+mat-expansion-panel {
+    mat-form-field {
+        margin-right: 50px;
+    }
+}

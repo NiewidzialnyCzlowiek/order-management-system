@@ -17,15 +17,7 @@ $accent-color: #ffd740;
     padding: 8px, 16px, 8px, 16px;
     background: $theme-color;
     top: 0;
-
-    .button-wrapper {
-        height: 32px;
-    }
-    a {
-        padding-left: 16px;
-        padding-right: 16px;
-        text-decoration: none;
-    }
+    z-index: 100;
 }
 
 .content-wrapper {

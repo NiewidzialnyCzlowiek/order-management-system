@@ -1,31 +1,36 @@
 <mat-card>
-    <mat-card-title>Address Card</mat-card-title>
+    <div class="card-header">
+        <mat-card-title>Address Card</mat-card-title>
+        <button mat-mini-fab (click)="delete()" matTooltip="Delete this address">
+            <mat-icon>clear</mat-icon>
+        </button>    
+    </div>
     <mat-card-subtitle>Address Id: {{ address.id }} </mat-card-subtitle>
     <mat-card-content>
         <mat-form-field tabindex="1">
-            <mat-select placeholder="Customer" [(ngModel)]="address.customerId">
+            <mat-select placeholder="Customer" [(ngModel)]="address.customerId" (focusout)="onAddressModified()">
                 <mat-option *ngFor="let cust of customers" [value]="cust.id">
                     {{ cust.id }} - {{ cust.name }}
                 </mat-option>
             </mat-select>
         </mat-form-field>
         <mat-form-field tabindex="2">
-            <input matInput [(ngModel)]="address.country" placeholder="Country">
+            <input matInput [(ngModel)]="address.country" placeholder="Country" required (focusout)="onAddressModified()">
         </mat-form-field>
         <mat-form-field tabindex="3">
-            <input matInput [(ngModel)]="address.postCode" placeholder="Post Code">
+            <input matInput [(ngModel)]="address.postCode" placeholder="Post Code" required (focusout)="onAddressModified()">
         </mat-form-field>
         <mat-form-field tabindex="4">
-            <input matInput [(ngModel)]="address.city" placeholder="City">
+            <input matInput [(ngModel)]="address.city" placeholder="City" (focusout)="onAddressModified()">
         </mat-form-field>
         <mat-form-field tabindex="5">
-            <input matInput [(ngModel)]="address.street" placeholder="Street">
+            <input matInput [(ngModel)]="address.street" placeholder="Street" required (focusout)="onAddressModified()">
         </mat-form-field>
         <mat-form-field tabindex="6">
-            <input matInput [(ngModel)]="address.buildingNo" placeholder="Building No.">
+            <input matInput [(ngModel)]="address.buildingNo" placeholder="Building No." required (focusout)="onAddressModified()">
         </mat-form-field>
         <mat-form-field tabindex="7">
-            <input matInput [(ngModel)]="address.appartmentNo" placeholder="Appartment No.">
+            <input matInput [(ngModel)]="address.appartmentNo" placeholder="Appartment No." (focusout)="onAddressModified()">
         </mat-form-field>
     </mat-card-content>
 </mat-card>
