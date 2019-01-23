@@ -172,6 +172,13 @@ export class SalesOrderCardComponent implements OnInit {
     });
   }
 
+  updateProfit() {
+    this.dataService.updateSalesOrderProfit(this.order.id).subscribe( profitOrder => {
+      this.order.profit = profitOrder.profit;
+      this.showSnackBar('Profit updated');
+    });
+  }
+
   private transferOrderFields(from: SalesOrderHeader, to: SalesOrderHeader) {
     to.id = from.id;
     to.orderDate = from.orderDate;

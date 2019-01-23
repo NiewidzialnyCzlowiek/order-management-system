@@ -32,8 +32,10 @@
         </mat-select>
     </mat-form-field>
     <mat-form-field appearance="outline">
-      <input matInput placeholder="Profit" [(ngModel)]="order.profit" disabled>
+      <mat-label>Profit</mat-label>
+      <input matInput [(ngModel)]="order.profit">
     </mat-form-field>
+    <button mat-button (click)="updateProfit()" color="primary">Update profit</button>
   </mat-card-content>
 </mat-card>
 <mat-accordion>

@@ -102,6 +102,10 @@ export class DataService {
     return this.httpClient.post<DatabaseOperationStatus>(this.salesOrderHeaderControllerLink + 'delete', { intPk: id });
   }
 
+  updateSalesOrderProfit(id: number) {
+    return this.httpClient.get<SalesOrderHeader>(this.salesOrderHeaderControllerLink + 'profit/' + id.toString());
+  }
+
   getOrderLines(orderId: number) {
     return this.httpClient.get<SalesOrderLine[]>(this.salesOrderLineControllerLink + 'forHeader/' + orderId.toString());
   }
