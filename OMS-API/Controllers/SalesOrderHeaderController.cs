@@ -39,6 +39,17 @@ namespace OMSAPI.Controllers
         public ActionResult<DatabaseOperationStatus> Delete(DeletionRequest request)
         {
             return _salesOrderHeaderService.Delete(request.IntPk);
-        }    
+        }
+
+        [HttpGet("profit/{headerId}")]
+        public ActionResult<SalesOrderHeader> UpdateProfit(int headerId) {
+            var ok = _salesOrderHeaderService.UpdateProfit(headerId);
+            var orderHeader = _salesOrderHeaderService.Get(headerId);
+            if (!ok) {
+                orderHeader.Profit = 0.0M;
+            }
+            return orderHeader;
+        }
+
     }
 }

@@ -48,7 +48,7 @@ namespace OMSAPI.Services
 
         public DatabaseOperationStatus Insert(SalesOrderHeader salesOrderHeader)
         {
-            validate(salesOrderHeader);
+            Validate(salesOrderHeader);
             var tracked = _context.SalesOrderHeaders.Find(salesOrderHeader.Id);
             if(tracked != null) {
                 tracked.TransferFields(salesOrderHeader);
@@ -82,7 +82,7 @@ namespace OMSAPI.Services
             };
         }
 
-        private void validate(SalesOrderHeader header) {
+        private void Validate(SalesOrderHeader header) {
             if (_context.Addresses.Find(header.AddressId) == null) {
                 header.AddressId = null;
             }
@@ -99,6 +99,17 @@ namespace OMSAPI.Services
                     header.ShipmentDate = DateTime.Now;
                 }
             }
+        }
+
+        public bool UpdateProfit(int headerId) {
+            try {
+                var res = _context.Database.ExecuteSqlCommand($"CALL public.\"CalcSalesOrderProfit\"({headerId});");
+            }
+            catch(Exception e) {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+            return true;
         }
     }
 }

@@ -10,5 +10,6 @@ namespace OMSAPI.Interfaces
         IEnumerable<SalesOrderHeader> GetAll();
         DatabaseOperationStatus Modify(SalesOrderHeader salesOrderHeader);
         DatabaseOperationStatus Delete(int id);
+        bool UpdateProfit(int headerId);
     }
 }
