@@ -88,7 +88,7 @@ namespace OMSAPI.Services
 
         private bool UpdateLineAmount(int id) {
             try {
-                var res = _context.Database.ExecuteSqlCommand($"CALL public.\"CalculateSalesOrderLineAmount\"({id})");
+                var res = _context.Database.ExecuteSqlCommand($"CALL public.\"CalcSalesOrderLineAmount\"({id});");
             }
             catch(Exception e) {
                 Console.WriteLine(e.Message);
