@@ -5,7 +5,6 @@ import { DataService } from '../data.service';
 import { switchMap } from 'rxjs/operators';
 import { Address } from '../interfaces/address.interface';
 import { MatSnackBar, MatDialog } from '@angular/material';
-import { Observable } from 'rxjs';
 import { UserConfirmComponent } from '../user-confirm/user-confirm.component';
 
 @Component({
