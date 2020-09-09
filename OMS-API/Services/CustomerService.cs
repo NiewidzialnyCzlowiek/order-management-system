@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -14,51 +15,16 @@ namespace OMSAPI.Services
             _context = context;
         }
 
-        public DatabaseOperationStatus Insert(Customer customer)
+        public void Create(Customer customer)
         {
-            var tracked = Get(customer.Id);
-            if (tracked != null) {
-                tracked.Name = customer.Name;
-                return Modify(tracked);
-            } else {
-                _context.Customers.Add(customer);
-                var status = SaveChanges();
-                status.NewRecordId = customer.Id;
-                return status;
-            }
+            if(customer == null) throw new ArgumentNullException(nameof(customer));
+            _context.Customers.Add(customer);
         }
 
-        public DatabaseOperationStatus Delete(int customerId, bool cascade = false)
+        public void Delete(Customer customer)
         {
-            var customerToDelete = _context.Customers.FirstOrDefault(cust => cust.Id == customerId);
-            if (customerToDelete != null)
-            {
-                if (_context.SalesOrderHeaders.Where(order => order.CustomerId == customerToDelete.Id).Count() > 0) {
-                    return new DatabaseOperationStatus {
-                        StatusOk = false,
-                        Message = "Deletion unsuccesful. There are open Sales Orders for this customer."
-                    };
-                }
-                var addresses = _context.Addresses.Where(addr => addr.CustomerId == customerToDelete.Id);
-                if (addresses.Count() > 0)
-                {
-                    if (!cascade) {
-                        return new DatabaseOperationStatus {
-                            StatusOk = false,
-                            Message = "Deletion unsuccesful. There are Addresses for this customer."
-                        };                   
-                    } else {
-                        _context.Addresses.RemoveRange(addresses);
-                    }
-                }
-                _context.Customers.Remove(customerToDelete);
-                return SaveChanges();
-            } else {
-                return new DatabaseOperationStatus {
-                    StatusOk = false,
-                    Message = "Deletion unsuccessful"
-                };
-            }
+            if (customer == null) throw new ArgumentNullException(nameof(customer));
+            _context.Customers.Remove(customer);
         }
 
         public Customer Get(int id)
@@ -68,28 +34,15 @@ namespace OMSAPI.Services
 
         public IEnumerable<Customer> GetAll()
         {
-            return _context.Customers;
+            return _context.Customers.ToList();
         }
 
-        public DatabaseOperationStatus Modify(Customer customer)
+        public void Update(Customer customer)
         {
             _context.Entry(customer).State = EntityState.Modified;
-            return SaveChanges();
         }
-        private DatabaseOperationStatus SaveChanges() {
-            try {
-                _context.SaveChanges();
-            }
-            catch(DbUpdateException e) {
-                return new DatabaseOperationStatus {
-                    StatusOk = false,
-                    Message = e.Message
-                };
-            }
-            return new DatabaseOperationStatus {
-                StatusOk = true,
-                Message = "Operation successful"
-            };
+        public bool SaveChanges() {
+            return _context.SaveChanges() >= 0;
         }
     }
 }

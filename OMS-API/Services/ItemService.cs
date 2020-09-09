@@ -15,72 +15,34 @@ namespace OMSAPI.Services
             _context = context;
         }
 
-        public DatabaseOperationStatus Delete(int itemId)
+        public void Delete(Item item)
         {
-            var item = _context.Items.FirstOrDefault( it => it.Id == itemId );
-            if(item != null) {
-                if (itemPresentOnSalesOrders(item)) {
-                    return new DatabaseOperationStatus {
-                        StatusOk = false,
-                        Message = $"Cannot remove the item because it is used in at least one sales order"
-                    };
-                }
-                _context.Items.Remove(item);
-                return SaveChanges();
-            }
-            return new DatabaseOperationStatus {
-                StatusOk = false,
-                Message = $"There is no item with id { itemId }"
-            };
+            if(item == null) throw new ArgumentNullException(nameof(item));
+            _context.Items.Remove(item);
         }
 
-        private bool itemPresentOnSalesOrders(Item item)
+        public Item Get(int id)
         {
-            return _context.SalesOrderLines.Where(line => line.ItemId == item.Id).Count() > 0;
-        }
-
-        public Item Get(int itemId)
-        {
-            return _context.Items.Find(itemId);
+            return _context.Items.Find(id);
         }
 
         public IEnumerable<Item> GetAll()
         {
-            return _context.Items;
+            return _context.Items.ToList();
         }
 
-        public DatabaseOperationStatus Insert(Item item)
+        public void Create(Item item)
         {
-            var tracked = Get(item.Id);
-            if(tracked != null) {
-                tracked.TransferFields(item);
-                return Modify(tracked);
-            }
+            if(item == null) throw new ArgumentNullException(nameof(item));
             _context.Items.Add(item);
-            var status = SaveChanges();
-            status.NewRecordId = item.Id;
-            return status;
         }
 
-        public DatabaseOperationStatus Modify(Item item)
+        public void Update(Item item)
         {
             _context.Entry(item).State = EntityState.Modified;
-            return SaveChanges();
         }
-        private DatabaseOperationStatus SaveChanges() {
-            try {
-                _context.SaveChanges();
-            }
-            catch(DbUpdateException e) {
-                return new DatabaseOperationStatus {
-                    StatusOk = false,
-                    Message = e.Message
-                };
-            }
-            return new DatabaseOperationStatus {
-                StatusOk = true,
-                Message = "Operation successful"
-            };
+        public bool SaveChanges() {
+            return _context.SaveChanges() >= 0;
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using OMSAPI.Interfaces;
 using OMSAPI.Models;
@@ -11,34 +12,45 @@ namespace OMSAPI.Controllers
     [ApiController]    
     public class ItemController : ControllerBase
     {
-        private IItem _itemService;
-        public ItemController(IItem itemService)
+        private readonly IItem _itemService;
+        private readonly IMapper _mapper;
+        public ItemController(IItem itemService, Mapper mapper)
         {
             _itemService = itemService;
+            _mapper = mapper;
         }
 
-        [HttpGet("{itemId}")]
-        public ActionResult<Item> Get(int itemId) 
+        [HttpGet("{id}", Name="GetItem")]
+        public ActionResult<Item> GetItem(int id)
         {
-            return _itemService.Get(itemId);
+            var item = _itemService.Get(id);
+            if(item == null) return NotFound();
+            return Ok(item);
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<Item>> GetAll()
         {
-            return _itemService.GetAll().ToArray();
+            var items = _itemService.GetAll();
+            return Ok(items);
         }
 
         [HttpPost]
-        public ActionResult<DatabaseOperationStatus> Post(Item item)
+        public ActionResult Create(Item item)
         {
-            return _itemService.Insert(item);
+            _itemService.Create(item);
+            _itemService.SaveChanges();
+            return CreatedAtRoute(nameof(GetItem), new {id = item.Id}, item);
         }
 
-        [HttpPost("delete")]
-        public ActionResult<DatabaseOperationStatus> Delete(DeletionRequest request)
+        [HttpDelete("{id}")]
+        public ActionResult Delete(int id)
         {
-            return _itemService.Delete(request.IntPk);
+            var itemFromDb = _itemService.Get(id);
+            if(itemFromDb == null) return NotFound();
+            _itemService.Delete(itemFromDb);
+            _itemService.SaveChanges();
+            return NoContent();
         }    
     }
 }

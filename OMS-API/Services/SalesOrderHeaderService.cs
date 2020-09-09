@@ -15,17 +15,10 @@ namespace OMSAPI.Services
             _context = context;
         }
 
-        public DatabaseOperationStatus Delete(int id)
+        public void Delete(SalesOrderHeader salesOrderHeader)
         {
-            var salesOrderHeader = _context.SalesOrderHeaders.FirstOrDefault( orderHeader => orderHeader.Id == id);
-            if(salesOrderHeader != null) {
-                _context.SalesOrderHeaders.Remove(salesOrderHeader);
-                return SaveChanges();
-            }
-            return new DatabaseOperationStatus {
-                StatusOk = false,
-                Message = $"There is no salesOrderHeader with id: { id }"
-            };
+            if(salesOrderHeader == null) throw new ArgumentNullException(nameof(salesOrderHeader));
+            _context.SalesOrderHeaders.Remove(salesOrderHeader);
         }
 
         public SalesOrderHeader Get(int id)
@@ -42,44 +35,35 @@ namespace OMSAPI.Services
         {
             return _context.SalesOrderHeaders
                 .Include(header => header.Customer)
-                .Include(header => header.Address);
+                .Include(header => header.Address)
+                .ToList();
                 
         }
 
-        public DatabaseOperationStatus Insert(SalesOrderHeader salesOrderHeader)
+        public void Create(SalesOrderHeader salesOrderHeader)
         {
-            Validate(salesOrderHeader);
-            var tracked = _context.SalesOrderHeaders.Find(salesOrderHeader.Id);
-            if(tracked != null) {
-                tracked.TransferFields(salesOrderHeader);
-                return Modify(tracked);
-            }
+            if(salesOrderHeader == null) throw new ArgumentNullException(nameof(salesOrderHeader));
             _context.SalesOrderHeaders.Add(salesOrderHeader);
-            var status = SaveChanges();
-            status.NewRecordId = salesOrderHeader.Id;
-            return status;
         }
 
-        public DatabaseOperationStatus Modify(SalesOrderHeader salesOrderHeader)
+        public void Update(SalesOrderHeader salesOrderHeader)
         {
             _context.Entry(salesOrderHeader).State = EntityState.Modified;
-            return SaveChanges();
         }
 
-        private DatabaseOperationStatus SaveChanges() {
+        public bool SaveChanges() {
+            return _context.SaveChanges() >= 0;
+        }
+
+        public bool UpdateProfit(int headerId) {
             try {
-                _context.SaveChanges();
+                var res = _context.Database.ExecuteSqlInterpolated($"CALL public.\"CalcSalesOrderProfit\"({headerId});");
             }
-            catch(DbUpdateException e) {
-                return new DatabaseOperationStatus {
-                    StatusOk = false,
-                    Message = e.Message
-                };
+            catch(Exception e) {
+                Console.WriteLine(e.Message);
+                return false;
             }
-            return new DatabaseOperationStatus {
-                StatusOk = true,
-                Message = "Operation successful"
-            };
+            return true;
         }
 
         private void Validate(SalesOrderHeader header) {
@@ -99,17 +83,6 @@ namespace OMSAPI.Services
                     header.ShipmentDate = DateTime.Now;
                 }
             }
-        }
-
-        public bool UpdateProfit(int headerId) {
-            try {
-                var res = _context.Database.ExecuteSqlCommand($"CALL public.\"CalcSalesOrderProfit\"({headerId});");
-            }
-            catch(Exception e) {
-                Console.WriteLine(e.Message);
-                return false;
-            }
-            return true;
         }
     }
 }

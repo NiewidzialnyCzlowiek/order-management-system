@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -14,17 +15,10 @@ namespace OMSAPI.Services
             _context = context;
         }
 
-        public DatabaseOperationStatus Delete(string code)
+        public void Delete(UnitOfMeasure unitOfMeasure)
         {
-            var unitOfMeasure = _context.UnitsOfMeasure.FirstOrDefault( uom => uom.Code == code);
-            if(unitOfMeasure != null) {
-                _context.UnitsOfMeasure.Remove(unitOfMeasure);
-                return SaveChanges();
-            }
-            return new DatabaseOperationStatus {
-                StatusOk = true,
-                Message = $"There is no unitOfMeasure with code: { code }"
-            };
+            if(unitOfMeasure == null) throw new ArgumentNullException(nameof(unitOfMeasure));
+            _context.UnitsOfMeasure.Remove(unitOfMeasure);
         }
 
         public UnitOfMeasure Get(string code)
@@ -34,41 +28,22 @@ namespace OMSAPI.Services
 
         public IEnumerable<UnitOfMeasure> GetAll()
         {
-            return _context.UnitsOfMeasure;
+            return _context.UnitsOfMeasure.ToList();
         }
 
-        public DatabaseOperationStatus Insert(UnitOfMeasure unitOfMeasure)
+        public void Create(UnitOfMeasure unitOfMeasure)
         {
-            var tracked = Get(unitOfMeasure.Code);
-            if(tracked != null) {
-                tracked.Code = unitOfMeasure.Code;
-                tracked.Name = unitOfMeasure.Name;
-                return Modify(tracked);
-            }
+            if(unitOfMeasure == null) throw new ArgumentNullException(nameof(unitOfMeasure));
             _context.UnitsOfMeasure.Add(unitOfMeasure);
-            return SaveChanges();
         }
 
-        public DatabaseOperationStatus Modify(UnitOfMeasure unitOfMeasure)
+        public void Update(UnitOfMeasure unitOfMeasure)
         {
             _context.Entry(unitOfMeasure).State = EntityState.Modified;
-            return SaveChanges();
         }
 
-        private DatabaseOperationStatus SaveChanges() {
-            try {
-                _context.SaveChanges();
-            }
-            catch(DbUpdateException e) {
-                return new DatabaseOperationStatus {
-                    StatusOk = false,
-                    Message = e.Message
-                };
-            }
-            return new DatabaseOperationStatus {
-                StatusOk = true,
-                Message = "Operation successful"
-            };
+        public bool SaveChanges() {
+            return _context.SaveChanges() >= 0;
         }
     }
 }

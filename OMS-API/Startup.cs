@@ -14,6 +14,10 @@ using Microsoft.Extensions.Options;
 using OMSAPI.DataContext;
 using OMSAPI.Interfaces;
 using OMSAPI.Services;
+using Newtonsoft.Json.Serialization;
+using Newtonsoft.Json;
+using Microsoft.Extensions.Hosting;
+using AutoMapper;
 
 namespace OMSAPI
 {
@@ -32,37 +36,43 @@ namespace OMSAPI
             services.AddCors();
             services.AddDbContext<OMSDbContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
-            services.AddMvc()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
-                .AddJsonOptions(options => { 
-                    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            services.AddControllers()
+                .AddNewtonsoftJson(setup => {
+                    setup.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                    setup.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                 });
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ICustomer, CustomerService>();
             services.AddScoped<IAddress, AddressService>();
             services.AddScoped<IItem, ItemService>();
             services.AddScoped<ISalesOrderHeader, SalesOrderHeaderService>();
             services.AddScoped<ISalesOrderLine, SalesOrderLineService>();
             services.AddScoped<IUnitOfMeasure, UnitOfMeasureService>();
+            services.AddSwaggerGen();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
+            if (env.IsDevelopment()) {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
+            else {
                 app.UseHsts();
             }
+            app.UseHttpsRedirection();
+            app.UseRouting();
             app.UseCors(corsPolicyBuilder =>
                 corsPolicyBuilder.AllowAnyOrigin()
-                .AllowAnyHeader()
-                .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
             );
-            app.UseHttpsRedirection();
-            app.UseMvc();
+            app.UseAuthorization();
+            app.UseEndpoints(endpoints => {
+                endpoints.MapControllers();
+            });
+            app.UseSwagger();
+            app.UseSwaggerUI();
         }
     }
 }

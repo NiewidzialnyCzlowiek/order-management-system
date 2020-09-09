@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using OMSAPI.Interfaces;
 using OMSAPI.Models;
@@ -11,45 +12,55 @@ namespace OMSAPI.Controllers
     [ApiController]    
     public class SalesOrderHeaderController : ControllerBase
     {
-        private ISalesOrderHeader _salesOrderHeaderService;
-        public SalesOrderHeaderController(ISalesOrderHeader salesOrderHeaderService)
+        private readonly ISalesOrderHeader _salesOrderHeaderService;
+        private readonly IMapper _mapper;
+        public SalesOrderHeaderController(ISalesOrderHeader salesOrderHeaderService, Mapper mapper)
         {
             _salesOrderHeaderService = salesOrderHeaderService;
+            _mapper = mapper;
         }
 
-        [HttpGet("{headerId}")]
-        public ActionResult<SalesOrderHeader> Get(int headerId) 
+        [HttpGet("{id}", Name="GetSalesOrderHeader")]
+        public ActionResult<SalesOrderHeader> GetSalesOrderHeader(int id) 
         {
-            return _salesOrderHeaderService.Get(headerId);
+            var salesOrderHeader = _salesOrderHeaderService.Get(id);
+            if(salesOrderHeader == null) return NotFound();
+            return Ok(salesOrderHeader);
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<SalesOrderHeader>> GetAll()
         {
-            return _salesOrderHeaderService.GetAll().ToArray();
+            var salesOrderHeaders = _salesOrderHeaderService.GetAll();
+            return Ok(salesOrderHeaders);
         }
 
         [HttpPost]
-        public ActionResult<DatabaseOperationStatus> Post(SalesOrderHeader orderHeader)
+        public ActionResult Create(SalesOrderHeader salesOrderHeader)
         {
-            return _salesOrderHeaderService.Insert(orderHeader);
+            _salesOrderHeaderService.Create(salesOrderHeader);
+            _salesOrderHeaderService.SaveChanges();
+            return CreatedAtRoute(nameof(GetSalesOrderHeader), new {id = salesOrderHeader.Id}, salesOrderHeader);
         }
 
-        [HttpPost("delete")]
-        public ActionResult<DatabaseOperationStatus> Delete(DeletionRequest request)
+        [HttpDelete("{id}")]
+        public ActionResult Delete(int id)
         {
-            return _salesOrderHeaderService.Delete(request.IntPk);
+            var headerFromDb = _salesOrderHeaderService.Get(id);
+            if(headerFromDb == null) return NotFound();
+            _salesOrderHeaderService.Delete(headerFromDb);
+            _salesOrderHeaderService.SaveChanges();
+            return NoContent();
         }
 
-        [HttpGet("profit/{headerId}")]
-        public ActionResult<SalesOrderHeader> UpdateProfit(int headerId) {
-            var ok = _salesOrderHeaderService.UpdateProfit(headerId);
-            var orderHeader = _salesOrderHeaderService.Get(headerId);
+        [HttpGet("profit/{id}")]
+        public ActionResult<SalesOrderHeader> UpdateProfit(int id) {
+            var ok = _salesOrderHeaderService.UpdateProfit(id);
+            var orderHeader = _salesOrderHeaderService.Get(id);
             if (!ok) {
                 orderHeader.Profit = 0.0M;
             }
             return orderHeader;
         }
-
     }
 }

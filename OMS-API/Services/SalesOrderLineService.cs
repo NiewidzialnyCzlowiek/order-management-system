@@ -15,17 +15,10 @@ namespace OMSAPI.Services
             _context = context;
         }
 
-        public DatabaseOperationStatus Delete(int id)
+        public void Delete(SalesOrderLine salesOrderLine)
         {
-            var salesOrderLine = _context.SalesOrderLines.FirstOrDefault( orderLine => orderLine.Id == id);
-            if(salesOrderLine != null) {
-                _context.SalesOrderLines.Remove(salesOrderLine);
-                return SaveChanges();
-            }
-            return new DatabaseOperationStatus {
-                StatusOk = false,
-                Message = $"There is no Sales Order Line with id: { id }"
-            };
+            if(salesOrderLine == null) throw new ArgumentNullException(nameof(salesOrderLine));
+            _context.SalesOrderLines.Remove(salesOrderLine);
         }
 
         public SalesOrderLine Get(int id)
@@ -37,58 +30,35 @@ namespace OMSAPI.Services
 
         public IEnumerable<SalesOrderLine> GetAll()
         {
-            return _context.SalesOrderLines;
+            return _context.SalesOrderLines.ToList();
         }
 
         public IEnumerable<SalesOrderLine> GetAllForSalesOrder(int salesOrderId)
         {
             return _context.SalesOrderLines
                 .Where(line => line.SalesOrderHeaderId == salesOrderId)
-                .Include(line => line.Item);
+                .Include(line => line.Item)
+                .ToList();
         }
 
-        public DatabaseOperationStatus Insert(SalesOrderLine salesOrderLine)
+        public void Create(SalesOrderLine salesOrderLine)
         {
-            DatabaseOperationStatus status;
-            var tracked = _context.SalesOrderLines.Find(salesOrderLine.Id);
-            if(tracked != null) {
-                tracked.TransferFields(salesOrderLine);
-                status = Modify(tracked);
-            }
+            if(salesOrderLine == null) throw new ArgumentNullException(nameof(salesOrderLine));
             _context.SalesOrderLines.Add(salesOrderLine);
-            status = SaveChanges();
-            status.NewRecordId = salesOrderLine.Id;
-            if (!UpdateLineAmount(salesOrderLine.Id)) {
-                status.Message += " Could not update line amount.";
-            }
-            return status;
         }
 
-        public DatabaseOperationStatus Modify(SalesOrderLine salesOrderLine)
+        public void Update(SalesOrderLine salesOrderLine)
         {
             _context.Entry(salesOrderLine).State = EntityState.Modified;
-            return SaveChanges();
         }
 
-        private DatabaseOperationStatus SaveChanges() {
-            try {
-                _context.SaveChanges();
-            }
-            catch(DbUpdateException e) {
-                return new DatabaseOperationStatus {
-                    StatusOk = false,
-                    Message = e.Message
-                };
-            }
-            return new DatabaseOperationStatus {
-                StatusOk = true,
-                Message = "Operation successful"
-            };
+        public bool SaveChanges() {
+            return _context.SaveChanges() >= 0;
         }
 
         private bool UpdateLineAmount(int id) {
             try {
-                var res = _context.Database.ExecuteSqlCommand($"CALL public.\"CalcSalesOrderLineAmount\"({id});");
+                var res = _context.Database.ExecuteSqlInterpolated($"CALL public.\"CalcSalesOrderLineAmount\"({id});");
             }
             catch(Exception e) {
                 Console.WriteLine(e.Message);

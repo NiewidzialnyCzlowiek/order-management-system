@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using OMSAPI.Interfaces;
 using OMSAPI.Models;
@@ -11,16 +12,21 @@ namespace OMSAPI.Controllers
     [ApiController]    
     public class AddressController : ControllerBase
     {
-        private IAddress _addressService;
-        public AddressController(IAddress addressService)
+        private readonly IAddress _addressService;
+        private readonly IMapper _mapper;
+
+        public AddressController(IAddress addressService, IMapper mapper)
         {
             _addressService = addressService;
+            _mapper = mapper;
         }
 
-        [HttpGet("{addressId}")]
-        public ActionResult<Address> Get(int addressId) 
+        [HttpGet("{id}", Name="GetAddress")]
+        public ActionResult<Address> GetAddress(int id) 
         {
-            return _addressService.Get(addressId);
+            var address = _addressService.Get(id);
+            if(address == null) return NotFound();
+            return Ok(address);
         }
 
         [HttpGet]
@@ -30,19 +36,36 @@ namespace OMSAPI.Controllers
         }
 
         [HttpPost]
-        public ActionResult<DatabaseOperationStatus> Post(Address address)
+        public ActionResult Create(Address address)
         {
-            return _addressService.Insert(address);
+            _addressService.Create(address);
+            _addressService.SaveChanges();
+            return CreatedAtRoute(nameof(GetAddress), new {id = address.Id}, address);
         }
-        [HttpGet("forCustomer/{customerId}")]
-        public ActionResult<IEnumerable<Address>> GetForCustomer(int customerId)
+        [HttpGet("forCustomer/{id}")]
+        public ActionResult<IEnumerable<Address>> GetForCustomer(int id)
         {
-            return _addressService.GetAllForCustomer(customerId).ToArray();
+            var addressesForCustomer = _addressService.GetAllForCustomer(id);
+            return Ok(addressesForCustomer);
         }
 
-        [HttpPost("delete")]
-        public ActionResult<DatabaseOperationStatus> Delete(DeletionRequest request) {
-            return _addressService.Delete(request.IntPk, request.Cascade);
+        [HttpDelete("{id}")]
+        public ActionResult Delete(int id) {
+            var addressFromDb = _addressService.Get(id);
+            if(addressFromDb == null) return NotFound();
+            _addressService.Delete(addressFromDb);
+            _addressService.SaveChanges();
+            return NoContent();
+        }
+
+        [HttpPut("{id}")]
+        public ActionResult Update(int id, Address address)
+        {
+            var addressFromDb = _addressService.Get(id);
+            if(addressFromDb == null) return NotFound();
+            _addressService.Update(address);
+            _addressService.SaveChanges();
+            return NoContent();
         }
     }
 }

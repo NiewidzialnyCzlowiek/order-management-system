@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -13,30 +14,10 @@ namespace OMSAPI.Services
         public AddressService(OMSDbContext context) {
             _context = context;
         }
-        public DatabaseOperationStatus Delete(int addressId, bool cascade = false)
+        public void Delete(Address address)
         {
-            var addressToDelete = _context.Addresses.FirstOrDefault(addr => addr.Id == addressId);
-            if (addressToDelete != null)
-            {
-                var orders = _context.SalesOrderHeaders.Where( order => order.AddressId == addressToDelete.Id);
-                if (orders.Count() > 0) {
-                    if (!cascade) {
-                        return new DatabaseOperationStatus {
-                            StatusOk = false,
-                            Message = $"Could not remove the address. There are existing sales orders for the address."
-                        };
-                    }
-                    // var t = orders.ForEachAsync(order => order.AddressId = 0);
-                    // t.Start();
-                    // t.Wait();
-                }
-                _context.Addresses.Remove(addressToDelete);
-                return SaveChanges();
-            }
-            return new DatabaseOperationStatus {
-                StatusOk = false,
-                Message = $"There is no address with id: { addressId }"
-            };
+            if (address == null) throw new ArgumentNullException(nameof(address));
+            _context.Addresses.Remove(address);
         }
 
         public Address Get(int addressId)
@@ -46,7 +27,7 @@ namespace OMSAPI.Services
 
         public IEnumerable<Address> GetAll()
         {
-            return _context.Addresses;
+            return _context.Addresses.ToList();
         }
 
         public IEnumerable<Address> GetAllForCustomer(int customerId)
@@ -54,38 +35,18 @@ namespace OMSAPI.Services
             return _context.Addresses.Where(addr => addr.CustomerId == customerId);
         }
 
-        public DatabaseOperationStatus Insert(Address address)
+        public void Create(Address address)
         {
-            var tracked = Get(address.Id);
-            if(tracked != null) {
-                tracked.TransferFields(address);
-                return Modify(tracked);
-            }
+            if(address == null) throw new ArgumentNullException(nameof(address));
             _context.Addresses.Add(address);
-            var status = SaveChanges();
-            status.NewRecordId = address.Id;
-            return status;
         }
 
-        public DatabaseOperationStatus Modify(Address address)
+        public void Update(Address address)
         {
             _context.Entry(address).State = EntityState.Modified;
-            return SaveChanges();
         }
-        private DatabaseOperationStatus SaveChanges() {
-            try {
-                _context.SaveChanges();
-            }
-            catch(DbUpdateException e) {
-                return new DatabaseOperationStatus {
-                    StatusOk = false,
-                    Message = e.Message
-                };
-            }
-            return new DatabaseOperationStatus {
-                StatusOk = true,
-                Message = "Operation successful"
-            };
+        public bool SaveChanges() {
+            return _context.SaveChanges() >= 0;
         }
     }
 }

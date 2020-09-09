@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using OMSAPI.Interfaces;
 using OMSAPI.Models;
@@ -8,37 +9,48 @@ using OMSAPI.Models;
 namespace OMSAPI.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]    
+    [ApiController]
     public class UnitOfMeasureController : ControllerBase
     {
-        private IUnitOfMeasure _unitOfMeasureService;
-        public UnitOfMeasureController(IUnitOfMeasure unitOfMeasureService)
+        private readonly IUnitOfMeasure _unitOfMeasureService;
+        private readonly IMapper _mapper;
+        public UnitOfMeasureController(IUnitOfMeasure unitOfMeasureService, Mapper mapper)
         {
             _unitOfMeasureService = unitOfMeasureService;
+            _mapper = mapper;
         }
 
-        [HttpGet("{uomCode}")]
-        public ActionResult<UnitOfMeasure> Get(string uomCode) 
+        [HttpGet("{code}", Name="GetUnitOfMeasure")]
+        public ActionResult<UnitOfMeasure> GetUnitOfMeasure(string code) 
         {
-            return _unitOfMeasureService.Get(uomCode);
+            var uom =_unitOfMeasureService.Get(code);
+            if(uom == null) return NotFound();
+            return Ok(uom);
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<UnitOfMeasure>> GetAll()
         {
-            return _unitOfMeasureService.GetAll().ToArray();
+            var uoms = _unitOfMeasureService.GetAll();
+            return Ok(uoms);
         }
 
         [HttpPost]
-        public ActionResult<DatabaseOperationStatus> Post(UnitOfMeasure unitOfMeasure)
+        public ActionResult Create(UnitOfMeasure unitOfMeasure)
         {
-            return _unitOfMeasureService.Insert(unitOfMeasure);
+            _unitOfMeasureService.Create(unitOfMeasure);
+            _unitOfMeasureService.SaveChanges();
+            return CreatedAtRoute(nameof(GetUnitOfMeasure), new {code = unitOfMeasure.Code}, unitOfMeasure);
         }
 
-        [HttpPost("delete")]
-        public ActionResult<DatabaseOperationStatus> Delete(DeletionRequest request)
+        [HttpDelete("{code}")]
+        public ActionResult Delete(string code)
         {
-            return _unitOfMeasureService.Delete(request.Pk);
+            var uomFromDb = _unitOfMeasureService.Get(code);
+            if(uomFromDb == null) return NotFound();
+            _unitOfMeasureService.Delete(uomFromDb);
+            _unitOfMeasureService.SaveChanges();
+            return NoContent();
         }    
     }
 }

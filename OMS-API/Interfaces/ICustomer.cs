@@ -5,10 +5,11 @@ namespace OMSAPI.Interfaces
 {
     public interface ICustomer
     {
-        DatabaseOperationStatus Insert(Customer customer);
-        Customer Get(int customerId);
+        void Create(Customer customer);
+        Customer Get(int id);
         IEnumerable<Customer> GetAll();
-        DatabaseOperationStatus Modify(Customer customer);
-        DatabaseOperationStatus Delete(int customerId, bool cascade = false);
+        void Update(Customer customer);
+        void Delete(Customer customer);
+        bool SaveChanges();
     }
 }

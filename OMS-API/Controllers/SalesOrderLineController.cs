@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using OMSAPI.Interfaces;
 using OMSAPI.Models;
@@ -12,37 +13,49 @@ namespace OMSAPI.Controllers
     public class SalesOrderLineController : ControllerBase
     {
         private ISalesOrderLine _salesOrderLineService;
-        public SalesOrderLineController(ISalesOrderLine salesOrderLineService)
+        private readonly IMapper _mapper;
+        public SalesOrderLineController(ISalesOrderLine salesOrderLineService, Mapper mapper)
         {
             _salesOrderLineService = salesOrderLineService;
+            _mapper = mapper;
         }
 
-        [HttpGet("{lineId}")]
-        public ActionResult<SalesOrderLine> Get(int lineId) 
+        [HttpGet("{id}", Name="SalesOrderLine")]
+        public ActionResult<SalesOrderLine> GetSalesOrderLine(int id) 
         {
-            return _salesOrderLineService.Get(lineId);
+            var salesOrderLine = _salesOrderLineService.Get(id);
+            if(salesOrderLine == null) return NotFound();
+            return Ok(salesOrderLine);
         }
-        [HttpGet("forHeader/{headerId}")]
-        public ActionResult<IEnumerable<SalesOrderLine>> GetAllForSalesOrderHeader(int headerId)
+        [HttpGet("forHeader/{id}")]
+        public ActionResult<IEnumerable<SalesOrderLine>> GetAllForSalesOrderHeader(int id)
         {
-            return _salesOrderLineService.GetAllForSalesOrder(headerId).ToArray();
+            var salesOrderLines = _salesOrderLineService.GetAllForSalesOrder(id);
+            return Ok(salesOrderLines);
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<SalesOrderLine>> GetAll()
         {
-            return _salesOrderLineService.GetAll().ToArray();
+            var salesOrderLines = _salesOrderLineService.GetAll();
+            return Ok(salesOrderLines);
         }
 
         [HttpPost]
-        public ActionResult<DatabaseOperationStatus> Post(SalesOrderLine orderLine)
+        public ActionResult Create(SalesOrderLine orderLine)
         {
-            return _salesOrderLineService.Insert(orderLine);
+            _salesOrderLineService.Create(orderLine);
+            _salesOrderLineService.SaveChanges();
+            return CreatedAtRoute(nameof(SalesOrderLine), new {id = orderLine.Id}, orderLine);
         }    
-        [HttpPost("delete")]
-        public ActionResult<DatabaseOperationStatus> Delete(DeletionRequest request)
+        [HttpDelete("{id}")]
+        public ActionResult Delete(int id)
         {
-            return _salesOrderLineService.Delete(request.IntPk);
+            var lineFromDb = _salesOrderLineService.Get(id);
+            if(lineFromDb == null) return NotFound();
+            _salesOrderLineService.Delete(lineFromDb);
+            _salesOrderLineService.SaveChanges();
+            return NoContent();
         }    
     }
 }
