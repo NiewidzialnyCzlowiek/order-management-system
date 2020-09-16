@@ -1,8 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using OMSAPI.Dtos.AddressDtos;
 using OMSAPI.Interfaces;
 using OMSAPI.Models;
 
@@ -22,31 +21,35 @@ namespace OMSAPI.Controllers
         }
 
         [HttpGet("{id}", Name="GetAddress")]
-        public ActionResult<Address> GetAddress(int id) 
+        public ActionResult<AddressReadFullDto> GetAddress(int id) 
         {
             var address = _addressService.Get(id);
             if(address == null) return NotFound();
-            return Ok(address);
+            return Ok(_mapper.Map<AddressReadFullDto>(address));
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Address>> GetAll()
+        public ActionResult<IEnumerable<AddressReadDto>> GetAll()
         {
-            return _addressService.GetAll().ToArray();
+            var addresses = _addressService.GetAll();
+            return Ok(_mapper.Map<IEnumerable<AddressReadDto>>(addresses));
         }
 
         [HttpPost]
-        public ActionResult Create(Address address)
+        public ActionResult Create(AddressCreateDto addressCreateDto)
         {
-            _addressService.Create(address);
+            var addressModel = _mapper.Map<Address>(addressCreateDto);
+            _addressService.Create(addressModel);
             _addressService.SaveChanges();
-            return CreatedAtRoute(nameof(GetAddress), new {id = address.Id}, address);
+            var addressReadFullDto = _mapper.Map<AddressReadFullDto>(addressModel); 
+            return CreatedAtRoute(nameof(GetAddress), new {id = addressReadFullDto.Id}, addressReadFullDto);
         }
+
         [HttpGet("forCustomer/{id}")]
-        public ActionResult<IEnumerable<Address>> GetForCustomer(int id)
+        public ActionResult<IEnumerable<AddressReadDto>> GetForCustomer(int id)
         {
             var addressesForCustomer = _addressService.GetAllForCustomer(id);
-            return Ok(addressesForCustomer);
+            return Ok(_mapper.Map<IEnumerable<AddressReadDto>>(addressesForCustomer));
         }
 
         [HttpDelete("{id}")]
@@ -59,11 +62,12 @@ namespace OMSAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public ActionResult Update(int id, Address address)
+        public ActionResult Update(int id, AddressUpdateDto addressUpdateDto)
         {
             var addressFromDb = _addressService.Get(id);
             if(addressFromDb == null) return NotFound();
-            _addressService.Update(address);
+            _mapper.Map(addressUpdateDto, addressFromDb);
+            _addressService.Update(addressFromDb);
             _addressService.SaveChanges();
             return NoContent();
         }

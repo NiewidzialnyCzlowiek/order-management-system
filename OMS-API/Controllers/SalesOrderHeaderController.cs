@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using OMSAPI.Dtos.SalesOrderHeaderDtos;
 using OMSAPI.Interfaces;
 using OMSAPI.Models;
 
@@ -21,26 +22,28 @@ namespace OMSAPI.Controllers
         }
 
         [HttpGet("{id}", Name="GetSalesOrderHeader")]
-        public ActionResult<SalesOrderHeader> GetSalesOrderHeader(int id) 
+        public ActionResult<SalesOrderHeaderReadFullDto> GetSalesOrderHeader(int id) 
         {
             var salesOrderHeader = _salesOrderHeaderService.Get(id);
             if(salesOrderHeader == null) return NotFound();
-            return Ok(salesOrderHeader);
+            return Ok(_mapper.Map<SalesOrderHeaderReadFullDto>(salesOrderHeader));
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<SalesOrderHeader>> GetAll()
+        public ActionResult<IEnumerable<SalesOrderHeaderReadDto>> GetAll()
         {
             var salesOrderHeaders = _salesOrderHeaderService.GetAll();
-            return Ok(salesOrderHeaders);
+            return Ok(_mapper.Map<IEnumerable<SalesOrderHeaderReadDto>>(salesOrderHeaders));
         }
 
         [HttpPost]
-        public ActionResult Create(SalesOrderHeader salesOrderHeader)
+        public ActionResult Create(SalesOrderHeaderCreateDto salesOrderHeaderCreateDto)
         {
-            _salesOrderHeaderService.Create(salesOrderHeader);
+            var salesOrderHeaderModel = _mapper.Map<SalesOrderHeader>(salesOrderHeaderCreateDto);
+            _salesOrderHeaderService.Create(salesOrderHeaderModel);
             _salesOrderHeaderService.SaveChanges();
-            return CreatedAtRoute(nameof(GetSalesOrderHeader), new {id = salesOrderHeader.Id}, salesOrderHeader);
+            var salesOrderHeaderReadFullDto = _mapper.Map<SalesOrderHeaderReadFullDto>(salesOrderHeaderModel);
+            return CreatedAtRoute(nameof(GetSalesOrderHeader), new {id = salesOrderHeaderReadFullDto.Id}, salesOrderHeaderReadFullDto);
         }
 
         [HttpDelete("{id}")]
@@ -49,6 +52,17 @@ namespace OMSAPI.Controllers
             var headerFromDb = _salesOrderHeaderService.Get(id);
             if(headerFromDb == null) return NotFound();
             _salesOrderHeaderService.Delete(headerFromDb);
+            _salesOrderHeaderService.SaveChanges();
+            return NoContent();
+        }
+
+        [HttpPut("{id}")]
+        public ActionResult Update(int id, SalesOrderHeaderUpdateDto salesOrderHeaderUpdateDto)
+        {
+            var salesOrderHeaderFromDb = _salesOrderHeaderService.Get(id);
+            if(salesOrderHeaderFromDb == null) return NotFound();
+            _mapper.Map(salesOrderHeaderUpdateDto, salesOrderHeaderFromDb);
+            _salesOrderHeaderService.Update(salesOrderHeaderFromDb);
             _salesOrderHeaderService.SaveChanges();
             return NoContent();
         }

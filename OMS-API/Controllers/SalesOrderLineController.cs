@@ -1,8 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using OMSAPI.Dtos.SalesOrderLineDtos;
 using OMSAPI.Interfaces;
 using OMSAPI.Models;
 
@@ -21,33 +20,36 @@ namespace OMSAPI.Controllers
         }
 
         [HttpGet("{id}", Name="SalesOrderLine")]
-        public ActionResult<SalesOrderLine> GetSalesOrderLine(int id) 
+        public ActionResult<SalesOrderLineReadFullDto> GetSalesOrderLine(int id) 
         {
             var salesOrderLine = _salesOrderLineService.Get(id);
             if(salesOrderLine == null) return NotFound();
-            return Ok(salesOrderLine);
+            return Ok(_mapper.Map<SalesOrderLineReadFullDto>(salesOrderLine));
         }
         [HttpGet("forHeader/{id}")]
-        public ActionResult<IEnumerable<SalesOrderLine>> GetAllForSalesOrderHeader(int id)
+        public ActionResult<IEnumerable<SalesOrderLineReadDto>> GetAllForSalesOrderHeader(int id)
         {
             var salesOrderLines = _salesOrderLineService.GetAllForSalesOrder(id);
-            return Ok(salesOrderLines);
+            return Ok(_mapper.Map<IEnumerable<SalesOrderLineReadDto>>(salesOrderLines));
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<SalesOrderLine>> GetAll()
+        public ActionResult<IEnumerable<SalesOrderLineReadDto>> GetAll()
         {
             var salesOrderLines = _salesOrderLineService.GetAll();
-            return Ok(salesOrderLines);
+            return Ok(_mapper.Map<IEnumerable<SalesOrderLineReadDto>>(salesOrderLines));
         }
 
         [HttpPost]
-        public ActionResult Create(SalesOrderLine orderLine)
+        public ActionResult Create(SalesOrderLineCreateDto salesOrderLineCreateDto)
         {
-            _salesOrderLineService.Create(orderLine);
+            var salesOrderLineModel = _mapper.Map<SalesOrderLine>(salesOrderLineCreateDto);
+            _salesOrderLineService.Create(salesOrderLineModel);
             _salesOrderLineService.SaveChanges();
-            return CreatedAtRoute(nameof(SalesOrderLine), new {id = orderLine.Id}, orderLine);
-        }    
+            var salesOrderLineReadFullDto = _mapper.Map<SalesOrderLineReadFullDto>(salesOrderLineModel);
+            return CreatedAtRoute(nameof(SalesOrderLine), new {id = salesOrderLineReadFullDto.Id}, salesOrderLineReadFullDto);
+        }
+
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
@@ -56,6 +58,17 @@ namespace OMSAPI.Controllers
             _salesOrderLineService.Delete(lineFromDb);
             _salesOrderLineService.SaveChanges();
             return NoContent();
-        }    
+        }
+
+        [HttpPut("{id}")]
+        public ActionResult Update(int id, SalesOrderLineUpdateDto salesOrderLineUpdateDto)
+        {
+            var salesOrderLineFromDb = _salesOrderLineService.Get(id);
+            if(salesOrderLineFromDb == null) return NotFound();
+            _mapper.Map(salesOrderLineUpdateDto, salesOrderLineFromDb);
+            _salesOrderLineService.Update(salesOrderLineFromDb);
+            _salesOrderLineService.SaveChanges();
+            return NoContent();
+        }
     }
 }
