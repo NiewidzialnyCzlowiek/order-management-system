@@ -4,7 +4,7 @@ namespace OMSAPI.Dtos.CustomerDtos
 {
     public class CustomerReadDto
     {
-        public int Id{ get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
     }
 }

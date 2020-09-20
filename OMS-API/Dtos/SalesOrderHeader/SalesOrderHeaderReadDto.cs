@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using OMSAPI.Dtos.AddressDtos;
 using OMSAPI.Dtos.CustomerDtos;
+using OMSAPI.Dtos.SalesOrderLineDtos;
 using OMSAPI.Models;
 
 namespace OMSAPI.Dtos.SalesOrderHeaderDtos
@@ -13,5 +15,7 @@ namespace OMSAPI.Dtos.SalesOrderHeaderDtos
         public CustomerReadDto Customer { get; set; }
         public int? AddressId { get; set; }
         public AddressReadDto Address { get; set; }
+        public virtual IEnumerable<SalesOrderLineReadDto> Lines { get; set; }
+
     }
 }

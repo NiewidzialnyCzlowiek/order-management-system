@@ -11,6 +11,5 @@ namespace OMSAPI.Dtos.SalesOrderLineDtos
         public int ItemId { get; set; }
         public ItemReadDto Item { get; set; }
         public int SalesOrderHeaderId { get; set; }
-        public SalesOrderHeaderReadDto SalesOrderHeader { get; set; }
     }
 }
