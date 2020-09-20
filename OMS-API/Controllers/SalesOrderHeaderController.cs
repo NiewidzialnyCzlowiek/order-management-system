@@ -15,7 +15,7 @@ namespace OMSAPI.Controllers
     {
         private readonly ISalesOrderHeader _salesOrderHeaderService;
         private readonly IMapper _mapper;
-        public SalesOrderHeaderController(ISalesOrderHeader salesOrderHeaderService, Mapper mapper)
+        public SalesOrderHeaderController(ISalesOrderHeader salesOrderHeaderService, IMapper mapper)
         {
             _salesOrderHeaderService = salesOrderHeaderService;
             _mapper = mapper;

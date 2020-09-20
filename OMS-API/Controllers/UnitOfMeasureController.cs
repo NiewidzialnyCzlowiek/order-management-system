@@ -13,7 +13,7 @@ namespace OMSAPI.Controllers
     {
         private readonly IUnitOfMeasure _unitOfMeasureService;
         private readonly IMapper _mapper;
-        public UnitOfMeasureController(IUnitOfMeasure unitOfMeasureService, Mapper mapper)
+        public UnitOfMeasureController(IUnitOfMeasure unitOfMeasureService, IMapper mapper)
         {
             _unitOfMeasureService = unitOfMeasureService;
             _mapper = mapper;

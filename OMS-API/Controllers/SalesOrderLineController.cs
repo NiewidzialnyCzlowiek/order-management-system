@@ -13,7 +13,7 @@ namespace OMSAPI.Controllers
     {
         private ISalesOrderLine _salesOrderLineService;
         private readonly IMapper _mapper;
-        public SalesOrderLineController(ISalesOrderLine salesOrderLineService, Mapper mapper)
+        public SalesOrderLineController(ISalesOrderLine salesOrderLineService, IMapper mapper)
         {
             _salesOrderLineService = salesOrderLineService;
             _mapper = mapper;

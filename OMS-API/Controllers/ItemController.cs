@@ -13,7 +13,7 @@ namespace OMSAPI.Controllers
     {
         private readonly IItem _itemService;
         private readonly IMapper _mapper;
-        public ItemController(IItem itemService, Mapper mapper)
+        public ItemController(IItem itemService, IMapper mapper)
         {
             _itemService = itemService;
             _mapper = mapper;
