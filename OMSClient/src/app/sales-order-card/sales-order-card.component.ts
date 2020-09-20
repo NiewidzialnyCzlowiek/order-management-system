@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, ParamMap } from '@angular/router';
 import { DataService } from '../data.service';
-import { SalesOrderHeader } from '../interfaces/sales-order-header.interface';
-import { Item } from '../interfaces/item.interface';
+import { SalesOrderHeaderReadFull, SalesOrderHeaderUpdate } from '../interfaces/sales-order-header.interface';
+import { ItemRead } from '../interfaces/item.interface';
 import { switchMap, retry } from 'rxjs/operators';
-import { Address } from '../interfaces/address.interface';
-import { Customer } from '../interfaces/customer.interface';
+import { AddressRead } from '../interfaces/address.interface';
+import { CustomerRead } from '../interfaces/customer.interface';
 import { MatTableDataSource, MatSnackBar, MatDialog } from '@angular/material';
-import { SalesOrderLine } from '../interfaces/sales-order-line.interface';
+import { SalesOrderLineCreate, SalesOrderLineRead } from '../interfaces/sales-order-line.interface';
 import { UserConfirmComponent } from '../user-confirm/user-confirm.component';
 
 @Component({
@@ -16,12 +16,13 @@ import { UserConfirmComponent } from '../user-confirm/user-confirm.component';
   styleUrls: ['./sales-order-card.component.scss']
 })
 export class SalesOrderCardComponent implements OnInit {
-  order: SalesOrderHeader;
-  xOrder: SalesOrderHeader;
-  items: Item[];
-  customers: Customer[];
-  addresses: Address[];
-  linesData: MatTableDataSource<SalesOrderLine>;
+  order = {} as SalesOrderHeaderReadFull;
+  newOrder = false;
+  xOrder = {} as SalesOrderHeaderReadFull;
+  items = [] as ItemRead[];
+  customers = [] as CustomerRead[];
+  addresses = [] as AddressRead[];
+  linesData: MatTableDataSource<SalesOrderLineRead>;
   newLineItemId = 0;
   newLineQuantity = 0;
   tableColumns: string[] = ['id', 'itemId', 'itemName', 'quantity', 'amount', 'delete'];
@@ -34,72 +35,60 @@ export class SalesOrderCardComponent implements OnInit {
     ) { }
 
   ngOnInit() {
-    this.order = { id: 0, orderDate: undefined, shipmentDate: undefined,
-                   profit: 0, customerId: 0, customer: undefined,
-                   addressId: 0, address: undefined, lines: undefined };
-    this.xOrder = { id: 0, orderDate: undefined, shipmentDate: undefined,
-                    profit: 0, customerId: 0, customer: undefined,
-                    addressId: 0, address: undefined, lines: undefined };
-    this.route.paramMap.pipe(
-      switchMap((params: ParamMap) =>
-      this.dataService.getSalesOrder(+params.get('id')))
-    ).subscribe( o => {
-      if (o) {
-        this.order = o;
+    const idFromRoute = this.route.snapshot.params.id;
+    this.setSalesOrderFromApi(idFromRoute);
+    this.dataService.getItems().subscribe( response => {
+      this.items = response.body;
+    });
+    this.dataService.getCustomers().subscribe( response => {
+      this.customers = response.body;
+    });
+  }
+
+  setSalesOrderFromApi(id: number) {
+    this.dataService.getSalesOrder(id).subscribe(response => {
+      if (response.ok) {
+        this.order = response.body;
+        this.newOrder = false;
+        this.setAddressesForCustomer();
         this.transferOrderFields(this.order, this.xOrder);
-        this.dataService.getOrderLines(this.order.id).subscribe( lines => {
-          this.linesData = new MatTableDataSource(lines);
-        });
-        this.dataService.getAddressesForCustomer(this.order.customerId).subscribe( addr => {
-          this.addresses = addr;
-        });
+        this.linesData = new MatTableDataSource(this.order.lines);
+      } else {
+        this.showSnackBar(`Cannot fetch order with id: ${id}`);
       }
     });
-    this.dataService.getItems().subscribe( items => {
-      this.items = items;
-    });
-    this.dataService.getCustomers().subscribe( custs => {
-      this.customers = custs;
+  }
+
+  setAddressesForCustomer() {
+    this.dataService.getAddressesForCustomer(this.order.customerId).subscribe(response => {
+      this.addresses = response.body;
     });
   }
 
   insertNewLine() {
-    this.dataService.newSalesOrderLine( { id: 0, itemId: this.newLineItemId,
-        quantity: this.newLineQuantity, salesOrderHeaderId: this.order.id,
-        amount: 0, salesOrderHeader: undefined, item: undefined
-      }).subscribe( status => {
-        if (status.statusOk) {
-          this.showSnackBar('New line inserted successfully');
-          this.newLineQuantity = 0;
-          this.dataService.getOrderLine(status.newRecordId).subscribe( line => {
-            const oldData = this.linesData.data;
-            oldData.push(line);
-            this.linesData.data = oldData;
-          });
-        } else {
-          this.showSnackBar(status.message);
-        }
-      });
+    const salesOrderLineCreate =  {
+      quantity: this.newLineQuantity,
+      amount: 0,
+      itemId: this.newLineItemId,
+      salesOrderHeaderId: this.order.id,
+    } as SalesOrderLineCreate;
+    this.dataService.newSalesOrderLine(salesOrderLineCreate).subscribe(response => {
+      if (response.ok) {
+        this.newLineQuantity = 0;
+        const oldData = this.linesData.data;
+        oldData.push(response.body as SalesOrderLineRead);
+        this.linesData.data = oldData;
+        this.showSnackBar('New line inserted successfully');
+      }
+    });
   }
 
   onSalesOrderModified() {
-    if (this.modified()) {
-      if (this.validate()) {
-        this.dataService.newSalesOrder(this.order).subscribe(status => {
-          if (status.statusOk) {
-            if (this.xOrder.id === 0) {
-              this.dataService.getSalesOrder(status.newRecordId).subscribe(newOrder => {
-                this.order = newOrder;
-              });
-              this.showSnackBar('Order created successfully');
-            }
-            this.showSnackBar('Order modified successfully');
-            this.transferOrderFields(this.order, this.xOrder);
-          } else {
-            this.showSnackBar(status.message);
-          }
-        });
-      }
+    if (!this.validate()) { return; }
+    if (this.newOrder) {
+      this.createOrder();
+    } else {
+      this.updateOrder();
     }
   }
 
@@ -110,9 +99,7 @@ export class SalesOrderCardComponent implements OnInit {
       this.showSnackBar('Shipment Date is before Order Date. Cannot update the order.');
     }
     if (this.order.customerId !== this.xOrder.customerId) {
-      this.dataService.getAddressesForCustomer(this.order.customerId).subscribe( addr => {
-        this.addresses = addr;
-      });
+      this.setAddressesForCustomer();
       this.order.addressId = 0;
     }
     return valid;
@@ -134,6 +121,30 @@ export class SalesOrderCardComponent implements OnInit {
     return false;
   }
 
+  createOrder() {
+    this.dataService.newSalesOrder(this.order).subscribe(response => {
+      if (response.ok) {
+        this.order = response.body;
+        this.newOrder = false;
+        this.transferOrderFields(this.order, this.xOrder);
+        this.showSnackBar('Order created successfully');
+      } else {
+        this.showSnackBar('Cannot create the order');
+      }
+    });
+  }
+
+  updateOrder() {
+    this.dataService.updateSalesOrder(this.order.id, this.order as SalesOrderHeaderUpdate).subscribe(response => {
+      if (response.ok) {
+        this.transferOrderFields(this.order, this.xOrder);
+        this.showSnackBar('Order updated successfully');
+      } else {
+        this.showSnackBar('Cannot update the order');
+      }
+    });
+  }
+
   delete() {
     const dialogRef = this.dialog.open(UserConfirmComponent, {
       width: '300px',
@@ -149,37 +160,33 @@ export class SalesOrderCardComponent implements OnInit {
   }
 
   deleteOrder() {
-    this.dataService.deleteSalesOrder(this.order.id).subscribe(status => {
-      if (status.statusOk) {
+    this.dataService.deleteSalesOrder(this.order.id).subscribe(response => {
+      if (response.ok) {
         this.showSnackBar('Order deleted succesfully');
         this.router.navigate(['/SalesOrders']);
-      } else {
-        this.showSnackBar(status.message);
       }
     });
   }
 
   deleteLine(lineId: number) {
     this.dataService.deleteSalesOrderLine(lineId).subscribe( status => {
-      if (status.statusOk) {
-        this.showSnackBar('Succesfully deleted order line');
-        const oldData = this.linesData.data;
-        oldData.splice(this.linesData.data.findIndex( line => line.id === lineId), 1);
-        this.linesData.data = oldData;
-      } else {
-        this.showSnackBar(status.message);
-      }
+      this.showSnackBar('Succesfully deleted order line');
+      const oldData = this.linesData.data;
+      oldData.splice(this.linesData.data.findIndex( line => line.id === lineId), 1);
+      this.linesData.data = oldData;
     });
   }
 
   updateProfit() {
-    this.dataService.updateSalesOrderProfit(this.order.id).subscribe( profitOrder => {
-      this.order.profit = profitOrder.profit;
-      this.showSnackBar('Profit updated');
+    this.dataService.updateSalesOrderProfit(this.order.id).subscribe( response => {
+      if (response.ok) {
+        this.order.profit = response.body.profit;
+        this.showSnackBar('Profit updated');
+      }
     });
   }
 
-  private transferOrderFields(from: SalesOrderHeader, to: SalesOrderHeader) {
+  private transferOrderFields(from: SalesOrderHeaderReadFull, to: SalesOrderHeaderReadFull) {
     to.id = from.id;
     to.orderDate = from.orderDate;
     to.shipmentDate = from.shipmentDate;

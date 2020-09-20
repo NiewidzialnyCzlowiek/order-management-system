@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { Customer } from '../interfaces/customer.interface';
+import { CustomerReadFull } from '../interfaces/customer.interface';
 import { ActivatedRoute, Router, ParamMap } from '@angular/router';
 import { DataService } from '../data.service';
-import { switchMap } from 'rxjs/operators';
-import { Address } from '../interfaces/address.interface';
+import { AddressReadFull } from '../interfaces/address.interface';
 import { MatSnackBar, MatDialog } from '@angular/material';
 import { UserConfirmComponent } from '../user-confirm/user-confirm.component';
 
@@ -13,8 +12,8 @@ import { UserConfirmComponent } from '../user-confirm/user-confirm.component';
   styleUrls: ['./customer-card.component.scss']
 })
 export class CustomerCardComponent implements OnInit {
-  customer: Customer;
-  newCustomer: boolean;
+  customer = {} as CustomerReadFull;
+  newCustomer = true;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -24,75 +23,84 @@ export class CustomerCardComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.customer = { id: 0, name: '', addresses: undefined };
-    this.route.paramMap.pipe(
-      switchMap((params: ParamMap) => {
-          return this.dataService.getCustomer(+params.get('id'));
-      })
-    ).subscribe( cust => {
-      if (cust) {
-        this.customer = cust;
-      }
-      this.dataService.getAddressesForCustomer(this.customer.id).subscribe( addresses => {
-        this.customer.addresses = addresses;
-      });
-    });
+    const idFromRoute = this.route.snapshot.params.id;
+    this.setCustomerFromApi(idFromRoute);
   }
 
-  goToAddress(address: Address) {
+  goToAddress(address: AddressReadFull) {
     this.router.navigate(['/Address', address.id]);
   }
 
   onCustomerModified() {
-    this.dataService.newCustomer(this.customer).subscribe( dbStatus => {
-      if (dbStatus.statusOk) {
-        if (this.customer.id <= 0) {
-          this.dataService.getCustomer(dbStatus.newRecordId).subscribe( cust => {
-            this.customer = cust;
-            this.dataService.getAddressesForCustomer(this.customer.id).subscribe( addresses => {
-              this.customer.addresses = addresses;
-            });
-            this.showSnackBar('Customer created successfully');
-          });
-        } else {
-          this.showSnackBar('Customer modified successfully');
-        }
-      } else {
-        this.showSnackBar('Couldn\'t modify customer');
-      }
-    });
-  }
-
-  delete() {
-    if (this.customer.addresses.length > 0) {
-      const dialogRef = this.dialog.open(UserConfirmComponent, {
-        width: '300px',
-        data: 'There are existing Addresses for the customer. Are you sure you want to delete the customer and all of his addresses?'
-      });
-      dialogRef.afterClosed().subscribe(res => {
-        if (res.answer) {
-          this.deleteCustomer(true);
-        } else {
-          this.showSnackBar('Deletion aborted');
-        }
-      });
+    if (!this.validate()) { return; }
+    if (this.newCustomer) {
+      this.createCustomer();
     } else {
-      this.deleteCustomer(false);
+      this.updateCustomer();
     }
   }
 
-  deleteCustomer(cascade: boolean) {
-    this.dataService.deleteCustomer(this.customer.id, cascade).subscribe(status => {
-      if (status.statusOk) {
-        this.showSnackBar(`Customer "${this.customer.name}" deleted successfully`);
-        this.router.navigate(['/Customers']);
+  delete() {
+    const dialogRef = this.dialog.open(UserConfirmComponent, {
+      width: '300px',
+      data: 'Are you sure you want to delete the customer with all the addresses?'
+    });
+    dialogRef.afterClosed().subscribe(res => {
+      if (res.answer) {
+        this.deleteCustomer();
       } else {
-        this.showSnackBar(status.message);
+        this.showSnackBar('Deletion aborted');
       }
     });
   }
 
   showSnackBar(message: string) {
     this.snackBar.open(message, 'OK', { duration: 3000 });
+  }
+
+  setCustomerFromApi(id: number) {
+    this.dataService.getCustomer(id).subscribe(response => {
+      if (response.ok) {
+        this.customer = response.body;
+        this.newCustomer = false;
+      } else {
+        this.showSnackBar(`Cannot fetch customer with id: ${id}`);
+      }
+    });
+  }
+
+  createCustomer() {
+    this.dataService.newCustomer(this.customer).subscribe(response => {
+      if (response.ok) {
+        this.customer = response.body;
+        this.newCustomer = false;
+        this.showSnackBar('Customer created successfully');
+      } else {
+        this.showSnackBar('Cannot create the customer');
+      }
+    });
+  }
+
+  updateCustomer() {
+    this.dataService.updateCustomer(this.customer.id, this.customer).subscribe(response => {
+      if (response.ok) {
+        this.showSnackBar('Customer updated successfully');
+      } else {
+        this.showSnackBar('Cannot update customer');
+      }
+    });
+  }
+
+  deleteCustomer() {
+    this.dataService.deleteCustomer(this.customer.id).subscribe(status => {
+      this.showSnackBar(`Customer "${this.customer.name}" deleted successfully`);
+      this.router.navigate(['/Customers']);
+    });
+  }
+
+  private validate() {
+    let valid = true;
+    if (this.customer.name === '') { valid = false; }
+    return valid;
   }
 }

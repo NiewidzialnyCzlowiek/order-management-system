@@ -1,10 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { DataService } from '../data.service';
-import { SalesOrderHeader } from '../interfaces/sales-order-header.interface';
-import { MatTableDataSource, MatSort } from '@angular/material';
-import { Customer } from '../interfaces/customer.interface';
-import { Address } from '../interfaces/address.interface';
+import { SalesOrderHeaderRead } from '../interfaces/sales-order-header.interface';
+import { MatTableDataSource, MatSort, MatSnackBar } from '@angular/material';
+import { CustomerRead } from '../interfaces/customer.interface';
+import { AddressRead } from '../interfaces/address.interface';
 
 @Component({
   selector: 'app-sales-order-list',
@@ -12,14 +12,12 @@ import { Address } from '../interfaces/address.interface';
   styleUrls: ['./sales-order-list.component.scss']
 })
 export class SalesOrderListComponent implements OnInit {
-  orderData: MatTableDataSource<SalesOrderHeader>;
+  orderData: MatTableDataSource<SalesOrderHeaderRead>;
   tableColumns: string[] = ['id', 'orderDate', 'customerName', 'addressCountry', 'addressCity', 'addressPostCode'];
-  emptyCustomer: Customer = { id: 0, name: '', addresses: undefined };
-  emptyAddress: Address = { id: 0, country: '', postCode: '',
-                            city: '', street: '', buildingNo: '',
-                            appartmentNo: '', customerId: 0, customer: undefined };
+  emptyCustomer = {} as CustomerRead;
+  emptyAddress = {} as AddressRead;
   constructor(
-    private route: ActivatedRoute,
+    private snackBar: MatSnackBar,
     private router: Router,
     private dataService: DataService
   ) { }
@@ -27,17 +25,22 @@ export class SalesOrderListComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;
 
   ngOnInit() {
-    this.dataService.getSalesOrders().subscribe(ords => {
-      ords.forEach(order => {
-        if (!order.address) {
-          order.address = this.emptyAddress;
-        }
-        if (!order.customer) {
-          order.customer = this.emptyCustomer;
-        }
-      });
-      this.orderData = new MatTableDataSource(ords);
-      this.orderData.sort = this.sort;
+    this.dataService.getSalesOrders().subscribe(response => {
+      if (response.ok) {
+        const orders = response.body;
+        orders.forEach(order => {
+          if (!order.address) {
+            order.address = this.emptyAddress;
+          }
+          if (!order.customer) {
+            order.customer = this.emptyCustomer;
+          }
+        });
+        this.orderData = new MatTableDataSource(orders);
+        this.orderData.sort = this.sort;
+      } else {
+        this.showSnackBar('Cannot get orders from the database');
+      }
     });
   }
 
@@ -45,7 +48,11 @@ export class SalesOrderListComponent implements OnInit {
     this.orderData.filter = filter.trim().toLowerCase();
   }
 
-  goToOrder(order: SalesOrderHeader) {
+  goToOrder(order: SalesOrderHeaderRead) {
     this.router.navigate(['/SalesOrder', order.id]);
+  }
+
+  showSnackBar(message: string) {
+    this.snackBar.open(message, 'OK', { duration: 3000 });
   }
 }

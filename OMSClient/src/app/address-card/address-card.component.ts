@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router, ParamMap } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DataService } from '../data.service';
-import { switchMap } from 'rxjs/operators';
-import { Address } from '../interfaces/address.interface';
-import { Customer } from '../interfaces/customer.interface';
 import { MatSnackBar } from '@angular/material';
+import { CustomerRead } from '../interfaces/customer.interface';
+import { AddressReadFull } from '../interfaces/address.interface';
 
 @Component({
   selector: 'app-address-card',
@@ -12,8 +11,9 @@ import { MatSnackBar } from '@angular/material';
   styleUrls: ['./address-card.component.scss']
 })
 export class AddressCardComponent implements OnInit {
-  address: Address;
-  customers: Customer[];
+  address = {} as AddressReadFull;
+  customers = [] as CustomerRead[];
+  newAddress = true;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -22,38 +22,21 @@ export class AddressCardComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.address = { id: 0, country: '', postCode: '',
-                     city: '', street: '', buildingNo: '',
-                     appartmentNo: '', customerId: 0, customer: undefined };
-    this.dataService.getCustomers().subscribe( custs => {
-      this.customers = custs;
-    });
-    this.route.paramMap.pipe(
-      switchMap((params: ParamMap) =>
-        this.dataService.getAddress(+params.get('id')))
-    ).subscribe( addr => {
-      if (addr) {
-        this.address = addr;
+    const idFromRoute = this.route.snapshot.params.id;
+    this.setAddressFromApi(idFromRoute);
+    this.dataService.getCustomers().subscribe(response => {
+      if (response.ok) {
+        this.customers = response.body;
       }
     });
   }
 
   onAddressModified() {
-    if (this.validate()) {
-      this.dataService.newAddress(this.address).subscribe( status => {
-        if (status.statusOk) {
-          if (this.address.id <= 0) {
-            this.dataService.getAddress(status.newRecordId).subscribe( addr => {
-              this.address = addr;
-            });
-            this.showSnackBar('Address created successfully');
-          } else {
-            this.showSnackBar('Address modified successfully');
-          }
-        } else {
-          this.showSnackBar('Couldn\'t modify the address. Check the form again and fix the errors.');
-        }
-      });
+    if (!this.validate()) { return; }
+    if (this.newAddress) {
+      this.createAddress();
+    } else {
+      this.updateAddress();
     }
   }
 
@@ -78,15 +61,43 @@ export class AddressCardComponent implements OnInit {
     this.snackBar.open(message, 'OK', { duration: 3000 });
   }
 
-  delete() {
-    this.dataService.deleteAddress(this.address.id).subscribe( status => {
-      if (status.statusOk) {
-        this.showSnackBar('Address deleted succesfully');
-        this.router.navigate(['/Addresses']);
+  setAddressFromApi(idFromRoute: number) {
+    this.dataService.getAddress(idFromRoute).subscribe(response => {
+      if (response.ok) {
+        this.address = response.body;
+        this.newAddress = false;
       } else {
-        this.showSnackBar(status.message);
+        this.showSnackBar(`Cannot fetch customer with id: ${idFromRoute}`);
       }
     });
   }
 
+  createAddress() {
+    this.dataService.newAddress(this.address).subscribe( response => {
+      if (response.ok) {
+        this.address = response.body;
+        this.newAddress = false;
+        this.showSnackBar('Address created successfully');
+      } else {
+        this.showSnackBar('Cannot create address');
+      }
+    });
+  }
+
+  updateAddress() {
+    this.dataService.updateAddress(this.address.id, this.address).subscribe(response => {
+      if (response.ok) {
+        this.showSnackBar('Address updated successfully');
+      } else {
+        this.showSnackBar('Cannot update address');
+      }
+    });
+  }
+
+  deleteAddress() {
+    this.dataService.deleteAddress(this.address.id).subscribe( status => {
+      this.showSnackBar('Address deleted succesfully');
+      this.router.navigate(['/Addresses']);
+    });
+  }
 }

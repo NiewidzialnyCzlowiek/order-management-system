@@ -6,7 +6,7 @@ $accent-color: #ffd740;
     display: grid;
     grid-template-columns: 1fr 10fr 1fr;
     grid-template-rows: 64px auto;
-    grid-template-areas: "navbar navbar navbar "
+    grid-template-areas: "navbar navbar navbar"
                         "sidebar content .";
 }
 .navbar {

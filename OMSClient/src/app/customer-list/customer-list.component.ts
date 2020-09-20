@@ -1,8 +1,8 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { DataService } from '../data.service';
-import { Customer } from '../interfaces/customer.interface';
+import { CustomerRead } from '../interfaces/customer.interface';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatTableDataSource, MatSort } from '@angular/material';
+import { MatTableDataSource, MatSort, MatSnackBar } from '@angular/material';
 
 @Component({
   selector: 'app-customer-list',
@@ -13,9 +13,9 @@ import { MatTableDataSource, MatSort } from '@angular/material';
 export class CustomerListComponent implements OnInit {
 
   tableColumns: string[] = ['id', 'name'];
-  customerData: MatTableDataSource<Customer>;
+  customerData: MatTableDataSource<CustomerRead>;
   constructor(
-    private route: ActivatedRoute,
+    private snackBar: MatSnackBar,
     private router: Router,
     private dataService: DataService) {
   }
@@ -23,9 +23,13 @@ export class CustomerListComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;
 
   ngOnInit() {
-    this.dataService.getCustomers().subscribe(c => {
-      this.customerData = new MatTableDataSource(c);
-      this.customerData.sort = this.sort;
+    this.dataService.getCustomers().subscribe(response => {
+      if (response.ok) {
+        this.customerData = new MatTableDataSource(response.body);
+        this.customerData.sort = this.sort;
+      } else {
+        this.showSnackBar('Cannot get customers from the database');
+      }
     });
   }
 
@@ -33,8 +37,11 @@ export class CustomerListComponent implements OnInit {
     this.customerData.filter = filter.trim().toLowerCase();
   }
 
-  goToCustomer(customer: Customer) {
+  goToCustomer(customer: CustomerRead) {
     this.router.navigate(['/Customer', customer.id]);
   }
 
+  showSnackBar(message: string) {
+    this.snackBar.open(message, 'OK', { duration: 3000 });
+  }
 }

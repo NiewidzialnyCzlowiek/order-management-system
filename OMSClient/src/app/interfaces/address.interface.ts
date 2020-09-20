@@ -1,6 +1,12 @@
-import { Customer } from './customer.interface';
-
-export interface Address {
+export interface AddressRead {
+    id: number;
+    country: string;
+    postCode: string;
+    city: string;
+    street: string;
+    buildingNo: string;
+}
+export interface AddressReadFull {
     id: number;
     country: string;
     postCode: string;
@@ -9,5 +15,22 @@ export interface Address {
     buildingNo: string;
     appartmentNo: string;
     customerId: number;
-    customer: Customer;
+}
+export interface AddressCreate {
+    country: string;
+    postCode: string;
+    city: string;
+    street: string;
+    buildingNo: string;
+    appartmentNo: string;
+    customerId: number;
+}
+export interface AddressUpdate {
+    country: string;
+    postCode: string;
+    city: string;
+    street: string;
+    buildingNo: string;
+    appartmentNo: string;
+    customerId: number;
 }

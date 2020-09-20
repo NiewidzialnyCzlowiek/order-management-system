@@ -1,8 +1,8 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { Address } from '../interfaces/address.interface';
-import { ActivatedRoute, Router } from '@angular/router';
+import { AddressRead } from '../interfaces/address.interface';
+import { Router } from '@angular/router';
 import { DataService } from '../data.service';
-import { MatTableDataSource, MatSort } from '@angular/material';
+import { MatTableDataSource, MatSort, MatSnackBar } from '@angular/material';
 
 @Component({
   selector: 'app-address-list',
@@ -10,20 +10,24 @@ import { MatTableDataSource, MatSort } from '@angular/material';
   styleUrls: ['./address-list.component.scss']
 })
 export class AddressListComponent implements OnInit {
-  addressData: MatTableDataSource<Address>;
+  addressData: MatTableDataSource<AddressRead>;
   tableColumns: string[] = ['id', 'country', 'city', 'street', 'buildingNo'];
   constructor(
-    private route: ActivatedRoute,
     private router: Router,
-    private dataService: DataService
-  ) { }
+    private dataService: DataService,
+    private snackBar: MatSnackBar,
+    ) { }
 
   @ViewChild(MatSort) sort: MatSort;
 
   ngOnInit() {
-    this.dataService.getAddresses().subscribe(addr => {
-      this.addressData = new MatTableDataSource(addr);
-      this.addressData.sort = this.sort;
+    this.dataService.getAddresses().subscribe(response => {
+      if (response.ok) {
+        this.addressData = new MatTableDataSource(response.body);
+        this.addressData.sort = this.sort;
+      } else {
+        this.showSnackBar('Cannot get addresses from database');
+      }
     });
   }
 
@@ -31,8 +35,11 @@ export class AddressListComponent implements OnInit {
     this.addressData.filter = filter.trim().toLowerCase();
   }
 
-  goToAddress(address: Address) {
+  goToAddress(address: AddressRead) {
     this.router.navigate(['/Address', address.id]);
   }
 
+  showSnackBar(message: string) {
+    this.snackBar.open(message, 'OK', { duration: 3000 });
+  }
 }

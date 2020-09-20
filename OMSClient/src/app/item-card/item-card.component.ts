@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Item } from '../interfaces/item.interface';
-import { UnitOfMeasure } from '../interfaces/unit-of-measure.interface';
+import { ItemCreate, ItemReadFull, ItemUpdate } from '../interfaces/item.interface';
+import { UnitOfMeasureRead } from '../interfaces/unit-of-measure.interface';
 import { ActivatedRoute, Router, ParamMap } from '@angular/router';
 import { DataService } from '../data.service';
 import { switchMap } from 'rxjs/operators';
@@ -12,8 +12,9 @@ import { MatSnackBar } from '@angular/material';
   styleUrls: ['./item-card.component.scss']
 })
 export class ItemCardComponent implements OnInit {
-  item: Item;
-  unitsOfMeasure: UnitOfMeasure[];
+  item = {} as ItemReadFull;
+  unitsOfMeasure = [] as UnitOfMeasureRead[];
+  newItem = true;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -22,37 +23,19 @@ export class ItemCardComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.item = { id: 0, name: '', description: '', unitPrice: undefined, unitCost: undefined, unitOfMeasureCode: undefined };
-    this.dataService.getUnitsOfMeasure().subscribe( uoms => {
-      this.unitsOfMeasure = uoms;
+    const idFromRoute = this.route.snapshot.params.id;
+    this.setItemFromApi(idFromRoute);
+    this.dataService.getUnitsOfMeasure().subscribe( response => {
+      this.unitsOfMeasure = response.body;
     });
-    this.route.paramMap.pipe(
-      switchMap((params: ParamMap) =>
-      this.dataService.getItem(+params.get('id')))
-    ).subscribe( it => {
-      if (it) {
-        this.item = it;
-      }
-    });
-
   }
 
   onItemModified() {
-    if (this.validate()) {
-      this.dataService.newItem(this.item).subscribe( status => {
-        if (status.statusOk) {
-          if (this.item.id <= 0) {
-            this.dataService.getItem(status.newRecordId).subscribe( item => {
-              this.item = item;
-            });
-            this.showSnackBar('Item created successfully');
-          } else {
-            this.showSnackBar('Item modified successfully');
-          }
-        } else {
-          this.showSnackBar(status.message);
-        }
-      });
+    if (!this.validate()) { return; }
+    if (this.newItem) {
+      this.createItem();
+    } else {
+      this.updateItem();
     }
   }
 
@@ -70,13 +53,42 @@ export class ItemCardComponent implements OnInit {
     return valid;
   }
 
-  delete() {
-    this.dataService.deleteItem(this.item.id).subscribe( status => {
-      if (status.statusOk) {
-        this.showSnackBar(`Item "${ this.item.name }" has been successfully deleted`);
-        this.router.navigate(['/Items']);
+  setItemFromApi(id: number) {
+    this.dataService.getItem(id).subscribe(response => {
+      if (response.ok) {
+        this.item = response.body;
+        this.newItem = false;
       } else {
-        this.showSnackBar(status.message);
+        this.showSnackBar(`Cannot fetch item with id: ${id}`);
+      }
+    });
+  }
+
+  deleteItem() {
+    this.dataService.deleteItem(this.item.id).subscribe( status => {
+      this.showSnackBar(`Item "${ this.item.name }" has been successfully deleted`);
+      this.router.navigate(['/Items']);
+    });
+  }
+
+  createItem() {
+    this.dataService.newItem(this.item as ItemCreate).subscribe(response => {
+      if (response.ok) {
+        this.item = response.body;
+        this.newItem = false;
+        this.showSnackBar('Item created successfully');
+      } else {
+        this.showSnackBar('Cannot create item');
+      }
+    });
+  }
+
+  updateItem() {
+    this.dataService.updateItem(this.item.id, this.item as ItemUpdate).subscribe(response => {
+      if (response.ok) {
+        this.showSnackBar('Item updated successfully');
+      } else {
+        this.showSnackBar('Cannot update the item');
       }
     });
   }

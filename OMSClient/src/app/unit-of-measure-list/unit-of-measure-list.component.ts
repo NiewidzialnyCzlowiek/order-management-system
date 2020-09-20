@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { DataService } from '../data.service';
-import { UnitOfMeasure } from '../interfaces/unit-of-measure.interface';
+import { UnitOfMeasureRead } from '../interfaces/unit-of-measure.interface';
 import { MatTableDataSource, MatSort, MatSnackBar } from '@angular/material';
 
 @Component({
@@ -10,7 +10,7 @@ import { MatTableDataSource, MatSort, MatSnackBar } from '@angular/material';
 })
 export class UnitOfMeasureListComponent implements OnInit {
   tableColumns: string[] = ['code', 'name', 'delete'];
-  uomData: MatTableDataSource<UnitOfMeasure>;
+  uomData: MatTableDataSource<UnitOfMeasureRead>;
 
   constructor(
     private dataService: DataService,
@@ -20,9 +20,13 @@ export class UnitOfMeasureListComponent implements OnInit {
   @ViewChild(MatSort) sort: MatSort;
 
   ngOnInit() {
-    this.dataService.getUnitsOfMeasure().subscribe(uoms => {
-      this.uomData = new MatTableDataSource(uoms);
-      this.uomData.sort = this.sort;
+    this.dataService.getUnitsOfMeasure().subscribe(response => {
+      if (response.ok) {
+        this.uomData = new MatTableDataSource(response.body);
+        this.uomData.sort = this.sort;
+      } else {
+        this.showSnackBar('Cannot get units of measure from the database');
+      }
     });
   }
 
@@ -31,14 +35,12 @@ export class UnitOfMeasureListComponent implements OnInit {
   }
 
   delete(code: string) {
-    this.dataService.deleteUnitOfMeasure(code).subscribe(status => {
-      if (status.statusOk) {
-        this.showSnackBar('Unit Of Measure deleted successfully');
+    this.dataService.deleteUnitOfMeasure(code).subscribe(response => {
+      if (response.ok) {
         const oldData = this.uomData.data;
         oldData.splice(this.uomData.data.findIndex( uom => uom.code === code), 1);
         this.uomData.data = oldData;
-      } else {
-        this.showSnackBar(status.message);
+        this.showSnackBar('Unit of Measure deleted successfully');
       }
     });
   }

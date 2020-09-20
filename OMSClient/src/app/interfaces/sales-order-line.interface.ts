@@ -1,12 +1,31 @@
-import { Item } from './item.interface';
-import { SalesOrderHeader } from './sales-order-header.interface';
+import { ItemRead, ItemReadFull } from './item.interface';
+import { SalesOrderHeaderRead, SalesOrderHeaderReadFull } from './sales-order-header.interface';
 
-export interface SalesOrderLine {
+export interface SalesOrderLineRead {
     id: number;
     quantity: number;
     amount: number;
     itemId: number;
-    item: Item;
+    item: ItemRead;
     salesOrderHeaderId: number;
-    salesOrderHeader: SalesOrderHeader;
+}
+export interface SalesOrderLineReadFull {
+    id: number;
+    quantity: number;
+    amount: number;
+    itemId: number;
+    item: ItemReadFull;
+    salesOrderHeaderId: number;
+}
+export interface SalesOrderLineCreate {
+    quantity: number;
+    amount: number;
+    itemId: number;
+    salesOrderHeaderId: number;
+}
+export interface SalesOrderLineUpdate {
+    quantity: number;
+    amount: number;
+    itemId: number;
+    salesOrderHeaderId: number;
 }
