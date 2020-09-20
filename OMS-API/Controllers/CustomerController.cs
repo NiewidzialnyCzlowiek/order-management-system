@@ -24,7 +24,7 @@ namespace OMSAPI.Controllers
         {
             var customer = _customerService.Get(id);
             if(customer == null) return NotFound();
-            return Ok(_mapper.Map<CustomerCreateDto>(customer));
+            return Ok(_mapper.Map<CustomerReadFullDto>(customer));
         }
 
         [HttpGet]
