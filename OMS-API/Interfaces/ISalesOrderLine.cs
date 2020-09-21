@@ -12,5 +12,6 @@ namespace OMSAPI.Interfaces
         void Update(SalesOrderLine salesOrderLine);
         void Delete(SalesOrderLine salesOrderLine);
         bool SaveChanges();
+        bool UpdateLineAmount(int id);
     }
 }

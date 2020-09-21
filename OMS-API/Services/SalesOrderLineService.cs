@@ -56,7 +56,7 @@ namespace OMSAPI.Services
             return _context.SaveChanges() >= 0;
         }
 
-        private bool UpdateLineAmount(int id) {
+        public bool UpdateLineAmount(int id) {
             try {
                 var res = _context.Database.ExecuteSqlInterpolated($"CALL public.\"CalcSalesOrderLineAmount\"({id});");
             }

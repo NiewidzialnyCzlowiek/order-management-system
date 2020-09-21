@@ -26,7 +26,7 @@ namespace OMSAPI.Services
             return _context.SalesOrderHeaders
                 .Include(h => h.Customer)
                 .Include(h => h.Address)
-                .Include(h => h.Lines)
+                .Include(h => h.Lines).ThenInclude(line => line.Item)
                 .Where(h => h.Id == id)
                 .First();
         }
