@@ -1,5 +1,4 @@
 import { ItemRead, ItemReadFull } from './item.interface';
-import { SalesOrderHeaderRead, SalesOrderHeaderReadFull } from './sales-order-header.interface';
 
 export interface SalesOrderLineRead {
     id: number;

@@ -17,7 +17,7 @@ import { UserConfirmComponent } from '../user-confirm/user-confirm.component';
 })
 export class SalesOrderCardComponent implements OnInit {
   order = {} as SalesOrderHeaderReadFull;
-  newOrder = false;
+  newOrder = true;
   xOrder = {} as SalesOrderHeaderReadFull;
   items = [] as ItemRead[];
   customers = [] as CustomerRead[];
@@ -32,7 +32,7 @@ export class SalesOrderCardComponent implements OnInit {
     private dataService: DataService,
     private snackBar: MatSnackBar,
     public dialog: MatDialog
-    ) { }
+  ) { }
 
   ngOnInit() {
     const idFromRoute = this.route.snapshot.params.id;
@@ -92,15 +92,23 @@ export class SalesOrderCardComponent implements OnInit {
     }
   }
 
+  onCustomerFieldModified() {
+    if (this.order.customerId !== this.xOrder.customerId) {
+      this.setAddressesForCustomer();
+      this.order.addressId = undefined;
+    }
+    this.onSalesOrderModified();
+  }
+
   validate() {
     let valid = true;
+    if (this.order.orderDate === undefined) { valid = false; }
+    if (this.order.shipmentDate === undefined) { valid = false; }
+    if (this.order.customerId === undefined) { valid = false; }
+    if (this.order.addressId === undefined) { valid = false; }
     if (this.order.shipmentDate < this.order.orderDate) {
       valid = false;
       this.showSnackBar('Shipment Date is before Order Date. Cannot update the order.');
-    }
-    if (this.order.customerId !== this.xOrder.customerId) {
-      this.setAddressesForCustomer();
-      this.order.addressId = 0;
     }
     return valid;
   }
@@ -127,6 +135,7 @@ export class SalesOrderCardComponent implements OnInit {
         this.order = response.body;
         this.newOrder = false;
         this.transferOrderFields(this.order, this.xOrder);
+        this.linesData = new MatTableDataSource([]);
         this.showSnackBar('Order created successfully');
       } else {
         this.showSnackBar('Cannot create the order');

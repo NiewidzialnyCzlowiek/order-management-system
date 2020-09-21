@@ -8,32 +8,32 @@
   <mat-card-subtitle>Order Id: {{ order.id }} </mat-card-subtitle>
   <mat-card-content>
     <mat-form-field tabindex="1" (focusout)="onSalesOrderModified()">
-      <input matInput [matDatepicker]="odPicker" [(ngModel)]="order.orderDate" placeholder="Order Date" disabled>
+      <input matInput [matDatepicker]="odPicker" [(ngModel)]="order.orderDate" placeholder="Order Date">
       <mat-datepicker-toggle matSuffix [for]="odPicker"></mat-datepicker-toggle>
       <mat-datepicker #odPicker disabled="false"></mat-datepicker>
     </mat-form-field>
     <mat-form-field tabindex="2" (focusout)="onSalesOrderModified()">
-      <input matInput [matDatepicker]="sdPicker" [(ngModel)]="order.shipmentDate" placeholder="Shipment Date" disabled>
+      <input matInput [matDatepicker]="sdPicker" [(ngModel)]="order.shipmentDate" placeholder="Shipment Date">
       <mat-datepicker-toggle matSuffix [for]="sdPicker"></mat-datepicker-toggle>
       <mat-datepicker #sdPicker disabled="false"></mat-datepicker>
     </mat-form-field>
     <mat-form-field tabindex="3">
       <mat-select placeholder="Customer" [(ngModel)]="order.customerId">
-        <mat-option *ngFor="let customer of customers" [value]="customer.id" (focusout)="onSalesOrderModified()">
+        <mat-option *ngFor="let customer of customers" [value]="customer.id" (focusout)="onCustomerFieldModified()">
             {{ customer.id }} - {{ customer.name }}
         </mat-option>
       </mat-select>
     </mat-form-field>
         <mat-form-field tabindex="4">
-          <mat-select placeholder="Ship-to Address" [(ngModel)]="order.addressId" (focusout)="onSalesOrderModified()">
-            <mat-option *ngFor="let address of addresses" [value]="address.id">
+          <mat-select placeholder="Ship-to Address" [(ngModel)]="order.addressId">
+            <mat-option *ngFor="let address of addresses" [value]="address.id" (focusout)="onSalesOrderModified()">
                 {{ address.id }} - {{ address.country }}, {{ address.city }}, {{ address.postCode }} 
             </mat-option>
         </mat-select>
     </mat-form-field>
     <mat-form-field appearance="outline">
       <mat-label>Profit</mat-label>
-      <input matInput [(ngModel)]="order.profit">
+      <input matInput [(ngModel)]="order.profit" readonly>
     </mat-form-field>
     <button mat-button (click)="updateProfit()" color="primary">Update profit</button>
   </mat-card-content>
@@ -74,7 +74,7 @@
   </ng-container>
   <ng-container matColumnDef="itemId">
     <mat-header-cell *matHeaderCellDef>Item Id.</mat-header-cell>
-    <mat-cell *matCellDef="let line"> {{ line.item.id }} </mat-cell>
+    <mat-cell *matCellDef="let line"> {{ line.itemId }} </mat-cell>
   </ng-container>
   <ng-container matColumnDef="itemName">
     <mat-header-cell *matHeaderCellDef>Item Name</mat-header-cell>
